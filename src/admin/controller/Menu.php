@@ -30,7 +30,6 @@ class Menu extends Base
     {
         $params = _validate($this->request->post(), 'sys_menu|type_id,name,url|menu_id,icon,sort,false');
         // 判断类别是否属于菜单
-        TypesService::instance()->isType((int)$params['type_id'], 1);
         if ($this->model->create($params)) {
             _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
         } else {
@@ -74,9 +73,6 @@ class Menu extends Base
             if (!UnlimitService::instance()->isUpdate($params, $menus, 'id', 'menu_id')) {
                 _result(['code' => 403, 'msg' => '父级菜单属于当前子级数据 或 父级菜单不存在'], _getEnCode());
             }
-        }
-        if (isset($params['type_id'])) {
-            TypesService::instance()->isType((int)$params['type_id'], 1);
         }
         if ($this->model->update($params)) {
             _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());

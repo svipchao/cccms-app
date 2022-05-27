@@ -6,7 +6,7 @@ namespace app\admin\controller;
 use app\admin\model\SysUser;
 use cccms\Base;
 use cccms\extend\{ArrExtend, JwtExtend};
-use cccms\services\{AuthService, MenuService};
+use cccms\services\{AuthService, MenuService, TypesService};
 
 /**
  * 用户管理

@@ -28,8 +28,6 @@ class Route extends Base
     public function create()
     {
         $params = _validate($this->request->post(), 'sys_route|type_id,alias,url,name|ext,desc,status,false');
-        // 判断类别是否属于菜单
-        TypesService::instance()->isType((int)$params['type_id'], 3);
         if ($this->model->create($params)) {
             _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
         } else {
@@ -64,9 +62,6 @@ class Route extends Base
     public function update()
     {
         $params = _validate($this->request->put(), 'sys_route|id|type_id,alias,url,ext,name,desc,status,false');
-        if (isset($params['type_id'])) {
-            TypesService::instance()->isType((int)$params['type_id'], 3);
-        }
         if ($this->model->update($params)) {
             _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
         } else {

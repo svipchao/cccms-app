@@ -28,8 +28,6 @@ class Config extends Base
     public function create()
     {
         $params = _validate($this->request->post(), 'sys_config|type_id,key,val|desc,false');
-        // 判断类别是否属于菜单
-        TypesService::instance()->isType((int)$params['type_id'], 2);
         if ($this->model->create($params)) {
             _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
         } else {
