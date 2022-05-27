@@ -9,7 +9,7 @@ use cccms\{Base, Storage};
  * 附件
  * @sort 999
  */
-class Index extends Base
+class File extends Base
 {
     /**
      * 附件
