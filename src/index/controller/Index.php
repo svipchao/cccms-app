@@ -6,7 +6,7 @@ namespace app\index\controller;
 use cccms\Base;
 
 /**
- * 首页
+ * 默认应用
  * @sort 999
  */
 class Index extends Base
