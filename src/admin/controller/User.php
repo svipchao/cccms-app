@@ -42,12 +42,11 @@ class User extends Base
      */
     public function delete()
     {
-        $res = $this->model->_read($this->request->delete('id/d', 0), false);
-        if ($res->isEmpty()) {
-            _result(['code' => 403, 'msg' => '用户不存在'], _getEnCode());
+        if ($this->model->_delete($this->request->delete('id/d', 0))) {
+            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
+        } else {
+            _result(['code' => 403, 'msg' => '删除失败，数据不存在'], _getEnCode());
         }
-        $res->delete();
-        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -116,7 +115,7 @@ class User extends Base
     {
         $accessToken = $this->app->request->header('accessToken', '');
         if (empty($accessToken)) {
-            $params = _validate($this->app->request->post(), 'sys_user|username,password');
+            $params = $this->request->post(['username' => '', 'password' => '']);
             $userInfo = AuthService::instance()->setUserInfo([
                 ['username', '=', $params['username']],
                 ['password', '=', md5($params['password'])],

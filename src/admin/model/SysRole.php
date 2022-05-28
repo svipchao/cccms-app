@@ -45,6 +45,12 @@ class SysRole extends Model
 
     public function nodes(): HasMany
     {
+        return $this->hasMany(SysRoleNode::class, 'role_id', 'id')
+            ->where('role_id', 'in', AuthService::instance()->getUserRoles(true));
+    }
+
+    public function loginNodes(): HasMany
+    {
         return $this->hasMany(SysRoleNode::class, 'role_id', 'id');
     }
 

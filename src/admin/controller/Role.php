@@ -42,12 +42,11 @@ class Role extends Base
      */
     public function delete()
     {
-        $res = $this->model->_read($this->request->delete('id/d', 0), false);
-        if ($res->isEmpty()) {
-            _result(['code' => 403, 'msg' => '角色不存在'], _getEnCode());
+        if ($this->model->_delete($this->request->delete('id/d', 0))) {
+            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
+        } else {
+            _result(['code' => 403, 'msg' => '删除失败，数据不存在'], _getEnCode());
         }
-        $res->together(['nodes'])->delete();
-        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -73,8 +72,7 @@ class Role extends Base
      */
     public function index()
     {
-        $ids = AuthService::instance()->getUserRoles(true);
-        $roles = $this->model->with('nodes')->where('id', 'in', $ids)->_list();
+        $roles = $this->model->with('nodes')->_list();
         foreach ($roles as &$role) {
             $role['nodes'] = array_column($role['nodes'], 'node');
         }
@@ -100,7 +98,7 @@ class Role extends Base
         $role_id = $this->request->get('role_id/d', 0);
         // 全部节点
         $allNodes = NodeService::instance()->getNodesInfo();
-        if ($role_id == 0) {
+        if ($role_id == 0 && AuthService::instance()->isAdmin()) {
             $nodes = array_keys($allNodes);
         } else {
             $nodes = $this->model->_read($role_id, false)->nodes()->column('node');
