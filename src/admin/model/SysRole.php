@@ -37,6 +37,12 @@ class SysRole extends Model
         }
     }
 
+    // 删除后
+    public static function onAfterDelete($model)
+    {
+        $model->nodes()->delete();
+    }
+
     public function nodes(): HasMany
     {
         return $this->hasMany(SysRoleNode::class, 'role_id', 'id');
