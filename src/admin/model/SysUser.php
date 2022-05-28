@@ -32,7 +32,14 @@ class SysUser extends Model
     // 关联组织
     public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id')->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
+        return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id')
+            ->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
+    }
+
+    // 关联组织
+    public function loginGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id');
     }
 
     // 关联组织(条件判断使用)
