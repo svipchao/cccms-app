@@ -6,7 +6,7 @@ namespace app\admin\controller;
 use app\admin\model\SysRole;
 use cccms\Base;
 use cccms\extend\ArrExtend;
-use cccms\services\{NodeService, AuthService, UnlimitService};
+use cccms\services\{NodeService, AuthService};
 
 /**
  * 角色管理
@@ -28,18 +28,8 @@ class Role extends Base
      */
     public function create()
     {
-        $params = _validate($this->request->post(), 'sys_role|role_name|role_id,role_desc,nodes');
-        // 判断父级角色是否属于当前用户所拥有的角色
-        if (!AuthService::instance()->isUserRole((int)($params['role_id'] ?? 0))) {
-            _result(['code' => 403, 'msg' => '未拥有该角色或角色不存在'], _getEnCode());
-        }
-        $res = $this->model->create($params);
-        if (isset($params['nodes'])) {
-            if (is_string($params['nodes'])) {
-                $params['nodes'] = explode(',', $params['nodes']);
-            }
-            $res->nodes()->saveAll(ArrExtend::createTwoArray($params['nodes'], 'node'));
-        }
+        $params = _validate('post', 'sys_role|role_name|role_id,role_desc,nodes');
+        $this->model->create($params);
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -52,17 +42,7 @@ class Role extends Base
      */
     public function delete()
     {
-        $id = $this->request->delete('id/d', 0);
-        // 判断当前用户是否拥有该角色
-        $userHasRole = AuthService::instance()->isUserRole($id);
-        if (!$userHasRole) {
-            _result(['code' => 403, 'msg' => '未拥有该角色'], _getEnCode());
-        }
-        $roles = AuthService::instance()->getAllRoles();
-        if (!UnlimitService::instance()->isDelete($id, $roles, 'id', 'role_id')) {
-            _result(['code' => 403, 'msg' => '该角色包含子角色，禁止删除'], _getEnCode());
-        }
-        $res = $this->model->_read($id, false);
+        $res = $this->model->_read($this->request->delete('id/d', 0), false);
         if ($res->isEmpty()) {
             _result(['code' => 403, 'msg' => '角色不存在'], _getEnCode());
         }
@@ -79,16 +59,8 @@ class Role extends Base
      */
     public function update()
     {
-        $params = _validate($this->request->put(), 'SysRole|id|role_name,role_id,role_desc,status,nodes');
-        $res = $this->model->with('nodes')->_read($params['id'], false);
-        if (isset($params['nodes'])) {
-            if (is_string($params['nodes'])) {
-                $params['nodes'] = explode(',', $params['nodes']);
-            }
-            $res->nodes()->delete();
-            $res->nodes()->saveAll(ArrExtend::createTwoArray($params['nodes'], 'node'));
-        }
-        $res->update($params);
+        $params = _validate('put', 'sys_role|id|role_name,role_id,role_desc,status,nodes');
+        $this->model->update($params);
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
