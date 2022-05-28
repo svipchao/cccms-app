@@ -24,7 +24,7 @@ class SysMenu extends Model
 
     public function setTypeIdAttr($value): int
     {
-        $types = array_column(TypesService::instance()->getAllTypes(), null, 'id');
+        $types = TypesService::instance()->getTypes(0, 'id');
         if (!isset($types[$value]) && $types[$value]['type'] != 1) {
             _result(['code' => 403, 'msg' => '类型错误'], _getEnCode());
         }

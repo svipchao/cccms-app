@@ -79,7 +79,7 @@ class User extends Base
         }
         // 处理组织
         if (isset($params['groupIds'])) {
-            $groups = AuthService::instance()->filterUserGroups($params['groupIds']);
+            $groups = $params['groupIds'];
             // 删除组织关联权限节点表数据
             $res->groups()->detach();
             $res->groups()->attach($groups);
@@ -98,14 +98,6 @@ class User extends Base
     public function index()
     {
         $params = $this->request->get(['group_id' => 0, 'type' => null, 'nickname' => '', 'username' => '', 'limit' => 10, 'page' => 1]);
-        $groupIds = [];
-        if ($params['group_id'] == 0 && !AuthService::instance()->isAdmin()) {
-            $groupIds = AuthService::instance()->getUserGroups(true);
-        } elseif (!AuthService::instance()->isUserGroup((int)$params['group_id'])) {
-            _result(['code' => 403, 'msg' => '没有该组织权限']);
-        } else {
-            $groupIds = AuthService::instance()->getGroupChildren([$params['group_id']], true);
-        }
         $where = [
             ['nickname', 'like', '%' . $params['nickname'] . '%'],
             ['username', 'like', '%' . $params['username'] . '%'],
@@ -114,13 +106,7 @@ class User extends Base
             $where[] = ['type', '=', $params['type']];
         }
         // 判断是否拥有当前组织
-        $users = $this->model->where($where)->with(['groups']);
-        if (!empty($params['group_id'])) {
-            $users = $users->hasWhere('userGroup', [['group_id', '=', $params['group_id']]]);
-        } elseif (!AuthService::instance()->isAdmin()) {
-            $users = $users->hasWhere('userGroup', [['group_id', 'in', $groupIds]]);
-        }
-        $users = $users->_page($params);
+        $users = $this->model->where($where)->with(['groups'])->_page($params);
         foreach ($users['data'] as &$user) {
             $user['groupIds'] = array_column($user['groups'], 'id');
         }

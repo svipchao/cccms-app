@@ -80,14 +80,6 @@ class Role extends Base
     public function update()
     {
         $params = _validate($this->request->put(), 'SysRole|id|role_name,role_id,role_desc,status,nodes');
-        // 判断父级角色是否属于当前用户所拥有的角色
-        if (isset($params['role_id']) && !AuthService::instance()->isUserRole((int)$params['role_id'])) {
-            _result(['code' => 403, 'msg' => '未拥有该角色或角色不存在'], _getEnCode());
-        }
-        $roles = AuthService::instance()->getAllRoles();
-        if (!UnlimitService::instance()->isUpdate($params, $roles, 'id', 'role_id')) {
-            _result(['code' => 403, 'msg' => '父级角色属于当前角色的子级，禁止更新'], _getEnCode());
-        }
         $res = $this->model->with('nodes')->_read($params['id'], false);
         if (isset($params['nodes'])) {
             if (is_string($params['nodes'])) {
@@ -134,9 +126,13 @@ class Role extends Base
     public function auth()
     {
         $role_id = $this->request->get('role_id/d', 0);
-        $nodes = AuthService::instance()->getRoleNodes($role_id);
         // 全部节点
         $allNodes = NodeService::instance()->getNodesInfo();
+        if ($role_id == 0) {
+            $nodes = array_keys($allNodes);
+        } else {
+            $nodes = $this->model->_read($role_id, false)->nodes()->column('node');
+        }
         // 框架节点
         $frameNodes = NodeService::instance()->getFrameNodes();
         $nodes = array_intersect_key($allNodes, array_flip($nodes));
