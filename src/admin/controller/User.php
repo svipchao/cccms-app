@@ -6,7 +6,7 @@ namespace app\admin\controller;
 use app\admin\model\SysUser;
 use cccms\Base;
 use cccms\extend\{ArrExtend, JwtExtend};
-use cccms\services\{AuthService, MenuService, TypesService};
+use cccms\services\{AuthService, MenuService};
 
 /**
  * 用户管理
@@ -28,13 +28,8 @@ class User extends Base
      */
     public function create()
     {
-        $params = _validate($this->request->post(), 'SysUser|nickname,username,password|groupIds');
-        $res = $this->model->create($params);
-        // 处理组织
-        if (isset($params['groupIds'])) {
-            $groups = AuthService::instance()->filterUserGroups($params['groupIds']);
-            $res->groups()->saveAll($groups);
-        }
+        $params = _validate('post', 'SysUser|nickname,username,password|groupIds');
+        $this->model->create($params);
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -47,17 +42,10 @@ class User extends Base
      */
     public function delete()
     {
-        $id = $this->request->delete('id/d', 0);
-        if ($id === _getAccessToken('id')) {
-            _result(['code' => 403, 'msg' => '禁止删除自己的账户'], _getEnCode());
-        }
-        // 删除
-        $res = $this->model->_read($id, false);
+        $res = $this->model->_read($this->request->delete('id/d', 0), false);
         if ($res->isEmpty()) {
             _result(['code' => 403, 'msg' => '用户不存在'], _getEnCode());
         }
-        // 删除组织以及关联权限节点表数据
-        $res->groups()->detach();
         $res->delete();
         _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
@@ -71,20 +59,8 @@ class User extends Base
      */
     public function update()
     {
-        $params = _validate($this->request->put(), 'SysUser|id|groupIds,nickname,username');
-        $params['password'] = $this->request->put('password', '');
-        $res = $this->model->findOrEmpty($params['id']);
-        if ($res->isEmpty()) {
-            _result(['code' => 403, 'msg' => '用户不存在'], _getEnCode());
-        }
-        // 处理组织
-        if (isset($params['groupIds'])) {
-            $groups = $params['groupIds'];
-            // 删除组织关联权限节点表数据
-            $res->groups()->detach();
-            $res->groups()->attach($groups);
-        }
-        $res->update($params);
+        $params = _validate('put', 'SysUser|id|groupIds,nickname,username');
+        $this->model->update($params);
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
@@ -97,7 +73,14 @@ class User extends Base
      */
     public function index()
     {
-        $params = $this->request->get(['group_id' => 0, 'type' => null, 'nickname' => '', 'username' => '', 'limit' => 10, 'page' => 1]);
+        $params = $this->request->get([
+            'group_id' => 0,
+            'type' => null,
+            'nickname' => '',
+            'username' => '',
+            'limit' => 10,
+            'page' => 1
+        ]);
         $where = [
             ['nickname', 'like', '%' . $params['nickname'] . '%'],
             ['username', 'like', '%' . $params['username'] . '%'],
@@ -105,7 +88,6 @@ class User extends Base
         if (is_numeric($params['type'])) {
             $where[] = ['type', '=', $params['type']];
         }
-        // 判断是否拥有当前组织
         $users = $this->model->where($where)->with(['groups'])->_page($params);
         foreach ($users['data'] as &$user) {
             $user['groupIds'] = array_column($user['groups'], 'id');

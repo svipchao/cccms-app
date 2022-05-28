@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\admin\model;
 
-use think\model\relation\{HasMany, BelongsToMany};
+use think\model\relation\BelongsToMany;
 use cccms\Model;
 use cccms\services\AuthService;
 
@@ -12,21 +12,35 @@ class SysUser extends Model
 {
     protected $append = ['type_text'];
 
-    // 写入前 新增操作和更新操作都会触发
     public static function onBeforeWrite($model)
     {
         if (!isset($model['id'])) {
-            $model['token'] = md5(uniqid('cc.', true) . time());
+            $model['token'] = md5(mt_rand(0, time()) . time());
         }
-        $res = self::mk()->where('id', '<>', $model['id'])->where(function ($query) use ($model) {
-            $query->whereOr([
-                ['nickname', '=', $model['nickname']],
-                ['username', '=', $model['username']],
-            ]);
-        })->findOrEmpty();
-        if ($res['username'] === $model['username']) {
-            _result(['code' => 403, 'msg' => '用户名已存在'], _getEnCode());
+    }
+
+    // 写入后
+    public static function onAfterWrite($model)
+    {
+        if (isset($model['groupIds'])) {
+            // 删除组织关联权限节点表数据
+            $model->append([])->groups()->detach();
+            $model->append([])->groups()->attach($model['groupIds']);
         }
+    }
+
+    // 删除前
+    public static function onBeforeDelete($model)
+    {
+        if ($model['id'] === _getAccessToken('id')) {
+            _result(['code' => 403, 'msg' => '禁止删除自己的账户'], _getEnCode());
+        }
+    }
+
+    // 删除后
+    public static function onAfterDelete($model)
+    {
+        $model->groups()->detach();
     }
 
     // 关联组织
@@ -40,12 +54,6 @@ class SysUser extends Model
     public function loginGroups(): BelongsToMany
     {
         return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id');
-    }
-
-    // 关联组织(条件判断使用)
-    public function userGroup(): HasMany
-    {
-        return $this->hasMany(SysUserGroup::class, 'user_id', 'id');
     }
 
     // 获取当前用户拥有的组织下的所有用户
