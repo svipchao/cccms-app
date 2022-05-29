@@ -75,7 +75,6 @@ class Group extends Base
         $groups = $this->model->with('roles')->_list(null, function ($item) {
             $item['role_ids'] = $item->roles->column('id');
         });
-        halt($groups);
         _result([
             'code' => 200,
             'msg' => 'success',
