@@ -27,7 +27,7 @@ class Data extends Base
      */
     public function create()
     {
-        $params = _validate($this->request->post(), 'sys_data|table,role_id,field|where,value');
+        $params = _validate('post', 'sys_data|table,role_id,field|where,value');
         // 权限验证
         AuthService::instance()->validateAuth($params);
         if ($this->model->create($params)) {

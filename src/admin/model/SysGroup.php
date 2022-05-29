@@ -43,7 +43,7 @@ class SysGroup extends Model
         // 删除组织角色关联数据
         $model->roles()->detach();
         // 删除组织用户关联数据
-
+        $model->users()->detach();
     }
 
     /**
@@ -63,6 +63,12 @@ class SysGroup extends Model
     public function loginRoles(): belongsToMany
     {
         return $this->belongsToMany(SysRole::class, SysGroupRole::class, 'role_id', 'group_id');
+    }
+
+    // 关联用户
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(SysUser::class, SysUserGroup::class, 'user_id', 'group_id');
     }
 
     public function setRoleIdAttr($value, $data): int

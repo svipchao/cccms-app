@@ -73,18 +73,20 @@ class User extends Base
     public function index()
     {
         $params = $this->request->get([
-            'group_id' => 0,
+            'group_id' => '1,3,4,5',
             'type' => null,
             'nickname' => '',
             'username' => '',
             'limit' => 10,
             'page' => 1
         ]);
-        $users = $this->model->withSearch(['nickname', 'username', 'type', 'group_id'], [
+        $users = $this->model->with(['groups'])->withSearch(['nickname', 'username', 'type', 'group_id'], [
             'nickname' => $params['nickname'],
             'username' => $params['username'],
+            'group_id' => $params['group_id'],
             'type' => $params['type'],
-        ])->with(['groups'])->_page($params);
+        ])->_page($params);
+        halt($users);
         _result([
             'code' => 200,
             'msg' => 'success',
