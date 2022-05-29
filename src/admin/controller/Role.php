@@ -65,17 +65,18 @@ class Role extends Base
 
     /**
      * 角色列表
-     * @auth true
-     * @login true
+     * @auth false
+     * @login false
      * @encode json|jsonp|xml
      * @methods GET
      */
     public function index()
     {
-        $roles = $this->model->with('nodes')->_list();
-        foreach ($roles as &$role) {
-            $role['nodes'] = array_column($role['nodes'], 'node');
-        }
+        $roles = $this->model->with(['groups', 'nodes'])->_list(null, function ($item) {
+            $item['nodes'] = array_column($item['nodes'], 'node');
+            $item['group_ids'] = array_column($item['groups'], 'id');
+            return $item;
+        });
         _result([
             'code' => 200,
             'msg' => 'success',
@@ -101,7 +102,7 @@ class Role extends Base
         if ($role_id == 0 && AuthService::instance()->isAdmin()) {
             $nodes = array_keys($allNodes);
         } else {
-            $nodes = $this->model->_read($role_id, false)->nodes()->column('node');
+            $nodes = $this->model->_read($role_id)->nodes()->column('node');
         }
         // 框架节点
         $frameNodes = NodeService::instance()->getFrameNodes();

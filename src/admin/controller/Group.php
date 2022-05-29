@@ -73,7 +73,8 @@ class Group extends Base
     public function index()
     {
         $groups = $this->model->with('roles')->_list(null, function ($item) {
-            $item['role_ids'] = $item->roles->column('id');
+            $item['role_ids'] = array_column($item['roles'], 'id');
+            return $item;
         });
         _result([
             'code' => 200,

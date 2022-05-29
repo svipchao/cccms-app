@@ -8,6 +8,7 @@ use think\model\relation\HasMany;
 use cccms\Model;
 use cccms\extend\ArrExtend;
 use cccms\services\AuthService;
+use think\model\relation\BelongsToMany;
 
 class SysRole extends Model
 {
@@ -50,6 +51,12 @@ class SysRole extends Model
     public function children(): hasMany
     {
         return $this->hasMany('SysRole', 'role_id');
+    }
+
+    public function groups(): belongsToMany
+    {
+        return $this->belongsToMany(SysGroup::class, SysGroupRole::class, 'group_id', 'role_id')
+            ->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
     }
 
     public function nodes(): HasMany
