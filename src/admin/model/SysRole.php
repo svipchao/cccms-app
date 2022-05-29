@@ -32,7 +32,8 @@ class SysRole extends Model
         if (!in_array($model['id'], AuthService::instance()->getUserRoles(true))) {
             _result(['code' => 403, 'msg' => '未拥有该角色'], _getEnCode());
         }
-        if (count(AuthService::instance()->getRoleChildren((int)$model['id'], true)) > 1) {
+        $role = $model->where('id', $model['id'])->with('children')->_read();
+        if (!empty($role['children'])) {
             _result(['code' => 403, 'msg' => '存在子级角色，禁止删除'], _getEnCode());
         }
     }
@@ -41,6 +42,14 @@ class SysRole extends Model
     public static function onAfterDelete($model)
     {
         $model->nodes()->delete();
+    }
+
+    /**
+     * 获取当前角色的子角色
+     */
+    public function children(): hasMany
+    {
+        return $this->hasMany('SysRole', 'role_id');
     }
 
     public function nodes(): HasMany

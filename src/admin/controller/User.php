@@ -80,17 +80,11 @@ class User extends Base
             'limit' => 10,
             'page' => 1
         ]);
-        $where = [
-            ['nickname', 'like', '%' . $params['nickname'] . '%'],
-            ['username', 'like', '%' . $params['username'] . '%'],
-        ];
-        if (is_numeric($params['type'])) {
-            $where[] = ['type', '=', $params['type']];
-        }
-        $users = $this->model->where($where)->with(['groups'])->_page($params);
-        foreach ($users['data'] as &$user) {
-            $user['groupIds'] = array_column($user['groups'], 'id');
-        }
+        $users = $this->model->withSearch(['nickname', 'username', 'type', 'group_id'], [
+            'nickname' => $params['nickname'],
+            'username' => $params['username'],
+            'type' => $params['type'],
+        ])->with(['groups'])->_page($params);
         _result([
             'code' => 200,
             'msg' => 'success',

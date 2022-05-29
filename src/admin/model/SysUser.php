@@ -9,8 +9,9 @@ use cccms\services\AuthService;
 
 class SysUser extends Model
 {
-    protected $append = ['type_text'];
+    protected $append = ['type_text', 'group_ids'];
 
+    // 写入前
     public static function onBeforeWrite($model)
     {
         if (!isset($model['id'])) {
@@ -53,6 +54,30 @@ class SysUser extends Model
     public function loginGroups(): BelongsToMany
     {
         return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id');
+    }
+
+    // 用户昵称搜索器
+    public function searchNickNameAttr($query, $value, $data)
+    {
+        $query->where('nickname', 'like', '%' . $value . '%');
+    }
+
+    // 用户账号搜索器
+    public function searchUserNameAttr($query, $value, $data)
+    {
+        $query->where('nickname', 'like', '%' . $value . '%');
+    }
+
+    // 用户类型搜索器
+    public function searchTypeAttr($query, $value, $data)
+    {
+        $query->where('type', '=', $value);
+    }
+
+    // 组织列表ID
+    public function getGroupIdsAttr(): array
+    {
+        return $this->with('groups')->column('id');
     }
 
     // 获取当前用户拥有的组织下的所有用户

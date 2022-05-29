@@ -4,10 +4,9 @@ declare(strict_types=1);
 namespace app\admin\model;
 
 use think\facade\Cache;
-use cccms\extend\ArrExtend;
-use cccms\services\AuthService;
-use think\model\relation\belongsToMany;
+use think\model\relation\{HasMany, belongsToMany};
 use cccms\Model;
+use cccms\services\AuthService;
 
 class SysGroup extends Model
 {
@@ -21,8 +20,8 @@ class SysGroup extends Model
             if (is_string($model['roles'])) {
                 $model['roles'] = explode(',', $model['roles']);
             }
-            $model->nodes()->delete();
-            $model->nodes()->saveAll($model['roles']);
+            $model->roles()->detach();
+            $model->roles()->saveAll($model['roles']);
         }
     }
 
@@ -32,7 +31,8 @@ class SysGroup extends Model
         if (!in_array($model['id'], AuthService::instance()->getUserGroups(true))) {
             _result(['code' => 403, 'msg' => '未拥有该组织'], _getEnCode());
         }
-        if (count(AuthService::instance()->getGroupChildren((int)$model['id'], true)) > 1) {
+        $group = $model->where('id', $model['id'])->with('children')->_read();
+        if (!empty($group['children'])) {
             _result(['code' => 403, 'msg' => '存在子级组织，禁止删除'], _getEnCode());
         }
     }
@@ -41,6 +41,14 @@ class SysGroup extends Model
     public static function onAfterDelete($model)
     {
         $model->roles()->detach();
+    }
+
+    /**
+     * 获取当前组织的子组织
+     */
+    public function children(): hasMany
+    {
+        return $this->hasMany('SysGroup', 'group_id');
     }
 
     public function roles(): belongsToMany
