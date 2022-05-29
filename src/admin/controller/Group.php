@@ -28,7 +28,7 @@ class Group extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_group|group_name|roles,true');
+        $params = _validate('post', 'sys_group|group_name|role_ids,user_ids,true');
         $this->model->create($params);
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
@@ -58,7 +58,7 @@ class Group extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'sys_group|id|roles,true');
+        $params = _validate('put', 'sys_group|id|role_ids,user_ids,true');
         $this->model->update($params);
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
@@ -72,10 +72,10 @@ class Group extends Base
      */
     public function index()
     {
-        $groups = $this->model->with('roles')->_list();
-        foreach ($groups as &$group) {
-            $group['roles'] = array_column($group['roles'], 'id');
-        }
+        $groups = $this->model->with('roles')->_list(null, function ($item) {
+            $item['role_ids'] = $item->roles->column('id');
+        });
+        halt($groups);
         _result([
             'code' => 200,
             'msg' => 'success',

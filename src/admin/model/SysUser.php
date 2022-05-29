@@ -22,10 +22,10 @@ class SysUser extends Model
     // 写入后
     public static function onAfterWrite($model)
     {
-        if (isset($model['groupIds'])) {
+        if (isset($model['group_ids'])) {
             // 删除组织关联权限节点表数据
             $model->append([])->groups()->detach();
-            $model->append([])->groups()->attach($model['groupIds']);
+            $model->append([])->groups()->attach($model['group_ids']);
         }
     }
 
@@ -50,6 +50,12 @@ class SysUser extends Model
             ->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
     }
 
+    // 组织列表ID
+    public function getGroupIdsAttr(): array
+    {
+        return $this->with('groups')->column('id');
+    }
+
     // 关联组织
     public function loginGroups(): BelongsToMany
     {
@@ -72,12 +78,6 @@ class SysUser extends Model
     public function searchTypeAttr($query, $value, $data)
     {
         $query->where('type', '=', $value);
-    }
-
-    // 组织列表ID
-    public function getGroupIdsAttr(): array
-    {
-        return $this->with('groups')->column('id');
     }
 
     // 获取当前用户拥有的组织下的所有用户

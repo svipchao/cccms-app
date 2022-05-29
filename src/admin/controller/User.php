@@ -28,7 +28,7 @@ class User extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'SysUser|nickname,username,password|groupIds');
+        $params = _validate('post', 'SysUser|nickname,username,password|group_ids');
         $this->model->create($params);
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
@@ -58,7 +58,7 @@ class User extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'SysUser|id|groupIds,nickname,username');
+        $params = _validate('put', 'SysUser|id|group_ids,nickname,username');
         $this->model->update($params);
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }

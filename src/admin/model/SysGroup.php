@@ -16,12 +16,12 @@ class SysGroup extends Model
     public static function onAfterWrite($model)
     {
         Cache::delete('SysGroups');
-        if (isset($model['roles'])) {
-            if (is_string($model['roles'])) {
-                $model['roles'] = explode(',', $model['roles']);
+        if (isset($model['role_ids'])) {
+            if (is_string($model['role_ids'])) {
+                $model['role_ids'] = explode(',', $model['role_ids']);
             }
             $model->roles()->detach();
-            $model->roles()->saveAll($model['roles']);
+            $model->roles()->saveAll($model['role_ids']);
         }
     }
 
@@ -40,7 +40,10 @@ class SysGroup extends Model
     // 删除后
     public static function onAfterDelete($model)
     {
+        // 删除组织角色关联数据
         $model->roles()->detach();
+        // 删除组织用户关联数据
+
     }
 
     /**
