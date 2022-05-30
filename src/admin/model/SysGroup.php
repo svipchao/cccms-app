@@ -31,7 +31,7 @@ class SysGroup extends Model
         if (!in_array($model['id'], AuthService::instance()->getUserGroups(true))) {
             _result(['code' => 403, 'msg' => '未拥有该组织'], _getEnCode());
         }
-        $group = $model->where('id', $model['id'])->with('children')->_read();
+        $group = $model->with('children')->_read($model['id']);
         if (!empty($group['children'])) {
             _result(['code' => 403, 'msg' => '存在子级组织，禁止删除'], _getEnCode());
         }
@@ -51,7 +51,7 @@ class SysGroup extends Model
      */
     public function children(): hasMany
     {
-        return $this->hasMany('SysGroup', 'group_id');
+        return $this->hasMany('SysGroup', 'group_id', 'id');
     }
 
     public function roles(): belongsToMany
@@ -71,15 +71,17 @@ class SysGroup extends Model
         return $this->belongsToMany(SysUser::class, SysUserGroup::class, 'user_id', 'group_id');
     }
 
-    public function setRoleIdAttr($value, $data): int
+    public function setGroupIdAttr($value, $data): int
     {
-        if (AuthService::instance()->isAdmin()) {
-            return (int)$value;
-        }
         if (!in_array($value, AuthService::instance()->getUserGroups(true))) {
             _result(['code' => 403, 'msg' => '未拥有该组织'], _getEnCode());
         }
-        if (in_array($value, AuthService::instance()->getGroupChildren((int)$data['id'], true))) {
+        $group = $this->with('children')->_read($data['id'], function ($data) {
+            $data = $data->toArray();
+            $data['children'] = array_column($data['children'], 'id');
+            return $data;
+        });
+        if (in_array($value, $group['children'])) {
             _result(['code' => 403, 'msg' => '不能选择自己的子组织'], _getEnCode());
         }
         return (int)$value;
