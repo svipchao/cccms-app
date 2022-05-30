@@ -3,17 +3,20 @@ declare(strict_types=1);
 
 namespace app\admin\model;
 
-use think\model\relation\BelongsToMany;
+use think\model\relation\{hasMany, BelongsToMany};
 use cccms\Model;
 use cccms\services\AuthService;
 
 class SysUser extends Model
 {
-    protected $append = ['type_text', 'group_ids'];
+    protected $append = ['type_text'];
 
     // 写入前
     public static function onBeforeWrite($model)
     {
+        if (empty($model['groups_ids'])) {
+            _result(['code' => 403, 'msg' => '请为用户指定一个组织'], _getEnCode());
+        }
         if (!isset($model['id'])) {
             $model['token'] = md5(mt_rand(0, time()) . time());
         }
@@ -50,10 +53,10 @@ class SysUser extends Model
             ->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
     }
 
-    // 组织列表ID
-    public function getGroupIdsAttr(): array
+    // 关联用户组织中间表
+    public function userGroups(): hasMany
     {
-        return $this->with('groups')->column('id');
+        return $this->hasMany(SysUserGroup::class, 'user_id', 'id');
     }
 
     // 关联组织
@@ -74,11 +77,21 @@ class SysUser extends Model
         $query->where('nickname', 'like', '%' . $value . '%');
     }
 
-    // 用户类型搜索器
+    // 组织用户搜索器
     public function searchGroupIdAttr($query, $value, $data)
     {
+        if (empty($value) && !AuthService::instance()->isAdmin()) {
+            $value = implode(',', AuthService::instance()->getUserGroups(true));
+        } else {
+            if (is_string($value)) {
+                $value = explode(',', $value);
+            }
+            $value = implode(',', array_intersect(AuthService::instance()->getUserGroups(true), $value));
+        }
         if ($value != null) {
-            $query->where('group_id', 'in', $value);
+            $query->hasWhere('userGroups', function ($query) use ($value) {
+                $query->where('group_id', 'in', $value);
+            });
         }
     }
 

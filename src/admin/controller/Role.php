@@ -65,8 +65,8 @@ class Role extends Base
 
     /**
      * 角色列表
-     * @auth false
-     * @login false
+     * @auth true
+     * @login true
      * @encode json|jsonp|xml
      * @methods GET
      */

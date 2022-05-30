@@ -73,20 +73,22 @@ class User extends Base
     public function index()
     {
         $params = $this->request->get([
-            'group_id' => '1,3,4,5',
+            'group_id' => null,
             'type' => null,
             'nickname' => '',
             'username' => '',
             'limit' => 10,
             'page' => 1
         ]);
-        $users = $this->model->with(['groups'])->withSearch(['nickname', 'username', 'type', 'group_id'], [
+        $users = $this->model->with('groups')->withSearch(['nickname', 'username', 'group_id', 'type'], [
             'nickname' => $params['nickname'],
             'username' => $params['username'],
             'group_id' => $params['group_id'],
             'type' => $params['type'],
-        ])->_page($params);
-        halt($users);
+        ])->_page($params, false, function ($item) {
+            $item['group_ids'] = array_column($item['groups'], 'id');
+            return $item;
+        });
         _result([
             'code' => 200,
             'msg' => 'success',
@@ -94,8 +96,8 @@ class User extends Base
                 'fields' => AuthService::instance()->fields('sys_user'),
                 'types' => config('cccms.user.types'),
                 'groups' => ArrExtend::toTreeList(AuthService::instance()->getUserGroups(), 'id', 'group_id'),
-                'total' => $users['total'],
-                'data' => $users['data']
+                'total' => $users['total'] ?? 0,
+                'data' => $users['data'] ?? []
             ]
         ], _getEnCode());
     }
