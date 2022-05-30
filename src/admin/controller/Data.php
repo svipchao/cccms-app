@@ -27,9 +27,7 @@ class Data extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_data|table,role_id,field|where,value');
-        // 权限验证
-        AuthService::instance()->validateAuth($params);
+        $params = _validate('post', 'sys_data|role_id,table,field|true');
         if ($this->model->create($params)) {
             _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
         } else {
@@ -46,9 +44,7 @@ class Data extends Base
      */
     public function delete()
     {
-        $params = _validate($this->request->delete(), 'sys_data|id,table,role_id,field');
-        // 权限验证
-        AuthService::instance()->validateAuth($params);
+        $params = _validate('delete', 'sys_data|id,table,role_id,field');
         if ($this->model->_delete(['id' => $params['id']])) {
             _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
         } else {
@@ -65,9 +61,7 @@ class Data extends Base
      */
     public function update()
     {
-        $params = _validate($this->request->put(), 'sys_data|id,table,role_id,field|where,value');
-        // 权限验证
-        AuthService::instance()->validateAuth($params);
+        $params = _validate('put', 'sys_data|id,table,role_id,field|true');
         if ($this->model->update($params)) {
             _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
         } else {
@@ -84,48 +78,30 @@ class Data extends Base
      */
     public function index()
     {
-        $params = $this->app->request->get(['limit' => 15, 'page' => 1, 'role_id' => 0, 'table' => '']);
-        $roles = AuthService::instance()->getUserRoles();
-        $wheres = [];
-        if ($params['role_id'] != 0) {
-            $wheres[] = ['role_id', '=', (int)$params['role_id']];
-        } else {
-            $wheres[] = ['role_id', 'in', array_column($roles, 'id')];
-        }
-        if (!empty($params['table'])) {
-            $wheres[] = ['table', '=', (string)$params['table']];
-        }
-
+        $params = $this->app->request->get([
+            'limit' => 15,
+            'page' => 1,
+            'role_id' => null,
+            'table' => null
+        ]);
         $tableInfo = InitService::instance()->getTables();
-        $fieldsInfo = [];
-        foreach ($tableInfo as $table => &$table_name) {
-            unset($table_name['rules']);
-            $fields = [];
-            foreach ($table_name['fields'] as $field => $field_name) {
-                $fieldsInfo[$table][$field] = explode('|', $field_name)[1] ?? $field;
-                $fields[] = [
-                    'field' => $field,
-                    'field_name' => $fieldsInfo[$table][$field],
-                ];
-            }
-            $table_name['fields'] = $fields;
-        }
-
-        $res = $this->model->where($wheres)->with('role')->_page($params);
-        foreach ($res['data'] as &$data) {
-            $table = $tableInfo[$data['table']] ?? [];
-            $data['table_name'] = $table['table_name'] ?? '未知';
-            $fields = $fieldsInfo[$data['table']] ?? [];
-            $data['field_name'] = $fields[$data['field']] ?? '|未知';
-        }
+        $data = $this->model->with('role')->withSearch(['role_id', 'table'], [
+            'role_id' => $params['role_id'],
+            'table' => $params['table']
+        ])->_page($params, false, function ($item) use ($tableInfo) {
+            $tableInfo = $tableInfo[$item['table']];
+            $item['table_name'] = $tableInfo['table_name'] ?? '未知';
+            $item['field_name'] = explode('|', $tableInfo['fields'][$item['field']] ?? '|未知')[1];
+            return $item;
+        });
         _result([
             'code' => 200,
             'msg' => 'success',
             'data' => [
-                'total' => $res['total'],
-                'roles' => $roles,
+                'total' => $data['total'],
+                'roles' => AuthService::instance()->getUserRoles(),
                 'table' => $tableInfo,
-                'data' => $res['data'],
+                'data' => $data['data'],
             ]
         ]);
     }

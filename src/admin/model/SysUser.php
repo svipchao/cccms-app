@@ -88,7 +88,7 @@ class SysUser extends Model
             }
             $value = implode(',', array_intersect(AuthService::instance()->getUserGroups(true), $value));
         }
-        if ($value != null) {
+        if (!empty($value)) {
             $query->hasWhere('userGroups', function ($query) use ($value) {
                 $query->where('group_id', 'in', $value);
             });
