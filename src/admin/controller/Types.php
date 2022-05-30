@@ -28,12 +28,9 @@ class Types extends Base
      */
     public function create()
     {
-        $params = _validate($this->request->post(), 'sys_types|type,name,alias,sort');
-        if ($this->model->create($params)) {
-            _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '添加失败'], _getEnCode());
-        }
+        $params = _validate('post', 'sys_types|type,name,alias,sort');
+        $this->model->create($params);
+        _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
     /**
