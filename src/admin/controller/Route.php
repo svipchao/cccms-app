@@ -27,7 +27,7 @@ class Route extends Base
      */
     public function create()
     {
-        $params = _validate($this->request->post(), 'sys_route|type_id,alias,url,name|ext,desc,status,false');
+        $params = _validate('post', 'sys_route|type_id,alias,url,name|true');
         if ($this->model->create($params)) {
             _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
         } else {
@@ -44,8 +44,7 @@ class Route extends Base
      */
     public function delete()
     {
-        $id = $this->request->delete('id/d', 0);
-        if ($this->model->_delete(['id' => $id])) {
+        if ($this->model->_delete($this->request->delete('id/d', 0))) {
             _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
         } else {
             _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
@@ -61,7 +60,7 @@ class Route extends Base
      */
     public function update()
     {
-        $params = _validate($this->request->put(), 'sys_route|id|type_id,alias,url,ext,name,desc,status,false');
+        $params = _validate('put', 'sys_route|id|true');
         if ($this->model->update($params)) {
             _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
         } else {
@@ -78,15 +77,15 @@ class Route extends Base
      */
     public function index()
     {
-        $params = $this->request->get(['page' => 1, 'limit' => 10, 'type_id' => 0]);
-        [$types, $wheres] = TypesService::instance()->getTypesAndWheres(3, (int)$params['type_id']);
-        $data = $this->model->where($wheres)->with('type')->_page($params);
+        $data = $this->model->with('type')->withSearch(['type_id'], [
+            'type_id' => $this->request->get('type_id/d', 0)
+        ])->_page($this->request->get(['page' => 1, 'limit' => 10]));
         _result([
             'code' => 200,
             'msg' => 'success',
             'data' => [
                 'fields' => AuthService::instance()->fields('sys_route'),
-                'types' => $types,
+                'types' => TypesService::instance()->getTypes(3),
                 'total' => $data['total'],
                 'data' => $data['data']
             ]

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace app\admin\controller;
 
-use app\admin\model\{SysFile, SysUser};
+use app\admin\model\SysFile;
 use cccms\{Base, Storage};
 use cccms\services\{AuthService, TypesService};
 
@@ -62,7 +62,7 @@ class File extends Base
      */
     public function update()
     {
-        $params = _validate($this->request->put(), 'sys_file|id|file_name,file_desc,extract_code,status,false');
+        $params = _validate('put', 'sys_file|id|file_name,file_desc,extract_code,status,false');
         if ($this->model->update($params)) {
             _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
         } else {
@@ -79,32 +79,25 @@ class File extends Base
      */
     public function index()
     {
-        $params = $this->app->request->get(['page' => 1, 'limit' => 10, 'type_id' => 0, 'user_id' => 0, 'like_user_str' => '']);
-        if ($params['like_user_str']) {
-            $res = SysUser::mk()->auth()->limit(10)->where([
-                ['nickname|username', 'like', '%' . $params['like_user_str'] . '%'],
-            ])->field('id,nickname,username')->_list();
-            _result([
-                'code' => 200,
-                'msg' => 'success',
-                'data' => $res
-            ], _getEnCode());
-        } else {
-            [$types, $wheres] = TypesService::instance()->getTypesAndWheres(4, (int)$params['type_id']);
-            $data = $this->model->auth($params['user_id'])->with([
-                'type',
-                'user'
-            ])->where($wheres)->order('id desc')->_page($params);
-            _result([
-                'code' => 200,
-                'msg' => 'success',
-                'data' => [
-                    'fields' => AuthService::instance()->fields('sys_file'),
-                    'types' => $types,
-                    'total' => $data['total'],
-                    'data' => $data['data']
-                ]
-            ], _getEnCode());
-        }
+        $params = $this->app->request->get([
+            'page' => 1,
+            'limit' => 10,
+            'type_id' => 0,
+            'user' => ''
+        ]);
+        $data = $this->model->auth()->with(['type', 'user'])->withSearch(['type_id', 'user'], [
+            'type_id' => $this->request->get('type_id/d', 0),
+            'user' => $params['user']
+        ])->order('id desc')->_page($params);
+        _result([
+            'code' => 200,
+            'msg' => 'success',
+            'data' => [
+                'fields' => AuthService::instance()->fields('sys_file'),
+                'types' => TypesService::instance()->getTypes(4),
+                'total' => $data['total'],
+                'data' => $data['data']
+            ]
+        ], _getEnCode());
     }
 }

@@ -33,8 +33,7 @@ class SysRole extends Model
         if (!in_array($model['id'], AuthService::instance()->getUserRoles(true))) {
             _result(['code' => 403, 'msg' => '未拥有该角色'], _getEnCode());
         }
-        $role = $model->where('id', $model['id'])->with('children')->_read();
-        if (!empty($role['children'])) {
+        if (in_array($model['id'], AuthService::instance()->getRoleChildren((int)$model['id'], false))) {
             _result(['code' => 403, 'msg' => '存在子级角色，禁止删除'], _getEnCode());
         }
     }
@@ -43,14 +42,6 @@ class SysRole extends Model
     public static function onAfterDelete($model)
     {
         $model->nodes()->delete();
-    }
-
-    /**
-     * 获取当前角色的子角色
-     */
-    public function children(): hasMany
-    {
-        return $this->hasMany('SysRole', 'role_id');
     }
 
     public function groups(): belongsToMany
@@ -72,14 +63,14 @@ class SysRole extends Model
 
     public function setRoleIdAttr($value, $data): int
     {
-        if (AuthService::instance()->isAdmin()) {
-            return (int)$value;
-        }
+        if (empty($value) && AuthService::instance()->isAdmin()) return 0;
         if (!in_array($value, AuthService::instance()->getUserRoles(true))) {
             _result(['code' => 403, 'msg' => '未拥有该角色'], _getEnCode());
         }
-        if (in_array($value, AuthService::instance()->getRoleChildren((int)$data['id'], true))) {
-            _result(['code' => 403, 'msg' => '不能选择自己的子角色'], _getEnCode());
+        if (isset($data['id'])) {
+            if (in_array($value, AuthService::instance()->getRoleChildren((int)$data['id'], false))) {
+                _result(['code' => 403, 'msg' => '不能选择自己的子角色'], _getEnCode());
+            }
         }
         return (int)$value;
     }

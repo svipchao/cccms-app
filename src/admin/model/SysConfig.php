@@ -22,10 +22,22 @@ class SysConfig extends Model
         ]);
     }
 
+    // 类别搜索器
+    public function searchTypeIdAttr($query, $value, $data)
+    {
+        $types = TypesService::instance()->getTypes(2, 'id');
+        if (empty($types)) {
+            $value = 0;
+        } elseif (!isset($types[$value])) {
+            $value = array_shift($types)['id'] ?? 0;
+        }
+        $query->where('type_id', '=', $value);
+    }
+
     public function setTypeIdAttr($value): int
     {
-        $types = TypesService::instance()->getTypes(0, 'id');
-        if (!isset($types[$value]) && $types[$value]['type'] != 2) {
+        $types = TypesService::instance()->getTypes(2, 'id');
+        if (!isset($types[$value])) {
             _result(['code' => 403, 'msg' => '类型错误'], _getEnCode());
         }
         return (int)$value;

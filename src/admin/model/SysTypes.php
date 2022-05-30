@@ -49,8 +49,15 @@ class SysTypes extends Model
         return $this->hasMany('SysFile', 'type_id', 'id');
     }
 
+    public function searchTypeAttr($query, $value, $data)
+    {
+        if (!empty($value)) {
+            $query->where('type', $value);
+        }
+    }
+
     public function getTypeTextAttr($value, $data): string
     {
-        return ['未知', '菜单', '配置', '路由', '附件'][$data['type']] ?? '未知';
+        return config('cccms.types.type')[$data['type']] ?? '未知';
     }
 }

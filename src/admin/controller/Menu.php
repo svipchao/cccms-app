@@ -6,7 +6,7 @@ namespace app\admin\controller;
 use app\admin\model\SysMenu;
 use cccms\Base;
 use cccms\extend\ArrExtend;
-use cccms\services\{AuthService, MenuService, TypesService, UnlimitService};
+use cccms\services\{AuthService, TypesService};
 
 /**
  * 菜单管理
@@ -28,7 +28,7 @@ class Menu extends Base
      */
     public function create()
     {
-        $params = _validate($this->request->post(), 'sys_menu|type_id,name,url|menu_id,icon,sort,false');
+        $params = _validate('post', 'sys_menu|type_id,name,url|true');
         // 判断类别是否属于菜单
         if ($this->model->create($params)) {
             _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
@@ -46,12 +46,7 @@ class Menu extends Base
      */
     public function delete()
     {
-        $params = _validate($this->request->delete(), 'sys_menu|id,type_id');
-        $menus = MenuService::instance()->getTypeMenus($params['type_id']);
-        if (!UnlimitService::instance()->isDelete($params, $menus, 'id', 'menu_id')) {
-            _result(['code' => 403, 'msg' => '存在子级数据 或 数据不存在'], _getEnCode());
-        }
-        if ($this->model->_delete(['id' => $params['id']])) {
+        if ($this->model->_delete($this->request->delete('id/d', 0))) {
             _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
         } else {
             _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
@@ -67,13 +62,7 @@ class Menu extends Base
      */
     public function update()
     {
-        $params = _validate($this->request->put(), 'sys_menu|id|type_id,name,url,menu_id,icon,sort,status,false');
-        if (isset($params['menu_id'])) {
-            $menus = MenuService::instance()->getTypeMenus($params['type_id']);
-            if (!UnlimitService::instance()->isUpdate($params, $menus, 'id', 'menu_id')) {
-                _result(['code' => 403, 'msg' => '父级菜单属于当前子级数据 或 父级菜单不存在'], _getEnCode());
-            }
-        }
+        $params = _validate('put', 'sys_menu|id|true');
         if ($this->model->update($params)) {
             _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
         } else {
@@ -90,15 +79,15 @@ class Menu extends Base
      */
     public function index()
     {
-        $params = $this->request->get(['page' => 1, 'limit' => 10, 'type_id' => 0]);
-        [$types, $wheres] = TypesService::instance()->getTypesAndWheres(1, (int)$params['type_id']);
-        $data = $this->model->where($wheres)->with('type')->_list();
+        $data = $this->model->with('type')->withSearch(['type_id'], [
+            'type_id' => $this->request->get('type_id/d', 0)
+        ])->_list();
         _result([
             'code' => 200,
             'msg' => 'success',
             'data' => [
                 'fields' => AuthService::instance()->fields('sys_menu'),
-                'types' => $types,
+                'types' => TypesService::instance()->getTypes(1),
                 'data' => ArrExtend::toTreeList($data, 'id', 'menu_id')
             ]
         ], _getEnCode());

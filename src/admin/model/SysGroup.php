@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace app\admin\model;
 
 use think\facade\Cache;
-use think\model\relation\{HasMany, belongsToMany};
+use think\model\relation\belongsToMany;
 use cccms\Model;
 use cccms\services\AuthService;
 
@@ -31,8 +31,7 @@ class SysGroup extends Model
         if (!in_array($model['id'], AuthService::instance()->getUserGroups(true))) {
             _result(['code' => 403, 'msg' => '未拥有该组织'], _getEnCode());
         }
-        $group = $model->with('children')->_read($model['id']);
-        if (!empty($group['children'])) {
+        if (in_array($model['id'], AuthService::instance()->getGroupChildren((int)$model['id'], false))) {
             _result(['code' => 403, 'msg' => '存在子级组织，禁止删除'], _getEnCode());
         }
     }
@@ -44,14 +43,6 @@ class SysGroup extends Model
         $model->roles()->detach();
         // 删除组织用户关联数据
         $model->users()->detach();
-    }
-
-    /**
-     * 获取当前组织的子组织
-     */
-    public function children(): hasMany
-    {
-        return $this->hasMany('SysGroup', 'group_id', 'id');
     }
 
     public function roles(): belongsToMany
@@ -73,16 +64,14 @@ class SysGroup extends Model
 
     public function setGroupIdAttr($value, $data): int
     {
+        if (empty($value) && AuthService::instance()->isAdmin()) return 0;
         if (!in_array($value, AuthService::instance()->getUserGroups(true))) {
             _result(['code' => 403, 'msg' => '未拥有该组织'], _getEnCode());
         }
-        $group = $this->with('children')->_read($data['id'], function ($data) {
-            $data = $data->toArray();
-            $data['children'] = array_column($data['children'], 'id');
-            return $data;
-        });
-        if (in_array($value, $group['children'])) {
-            _result(['code' => 403, 'msg' => '不能选择自己的子组织'], _getEnCode());
+        if (isset($data['id'])) {
+            if (in_array($value, AuthService::instance()->getGroupChildren((int)$data['id'], false))) {
+                _result(['code' => 403, 'msg' => '不能选择自己的子组织'], _getEnCode());
+            }
         }
         return (int)$value;
     }

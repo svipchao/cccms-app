@@ -44,8 +44,7 @@ class Config extends Base
      */
     public function delete()
     {
-        $id = $this->request->delete('id/d', 0);
-        if ($this->model->_delete(['id' => $id])) {
+        if ($this->model->_delete($this->request->delete('id/d', 0))) {
             _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
         } else {
             _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
@@ -83,33 +82,33 @@ class Config extends Base
      */
     public function index()
     {
-        $params = $this->request->get(['type_id' => 0]);
-        [$types, $wheres] = TypesService::instance()->getTypesAndWheres(2, (int)$params['type_id']);
-        $data = $this->model->where($wheres)->_list();
-        foreach ($data as $key => &$val) {
-            $val['configure'] = json_decode($val['configure'], true);
-            if (empty($val['configure'])) {
-                unset($data[$key]);
+        $data = $this->model->withSearch(['type_id'], [
+            'type_id' => $this->request->get('type_id/d', 0)
+        ])->_list(null, function ($item) {
+            $item['configure'] = json_decode($item['configure'], true);
+            if (empty($item['configure'])) {
+                return true;
             } else {
-                $val = array_merge($val['configure'], $val);
-                unset($val['configure']);
+                $item = array_merge($item['configure'], $item);
+                unset($item['configure']);
             }
-            if ($val['type'] === 'input-number') {
-                $val['value'] = (int)$val['value'];
+            if ($item['type'] === 'input-number') {
+                $item['value'] = (int)$item['value'];
             }
-            if ($val['type'] === 'multiple-select') {
-                $val['value'] = explode(',', strtoupper($val['value']));
+            if ($item['type'] === 'multiple-select') {
+                $item['value'] = explode(',', strtoupper($item['value']));
             }
-            if ($val['type'] === 'switch') {
-                $val['value'] = (int)$val['value'];
+            if ($item['type'] === 'switch') {
+                $item['value'] = (int)$item['value'];
             }
-        }
+            return $item;
+        });
         _result([
             'code' => 200,
             'msg' => 'success',
             'data' => [
                 'fields' => AuthService::instance()->fields('sys_config'),
-                'types' => $types,
+                'types' => TypesService::instance()->getTypes(2),
                 'data' => $data
             ]
         ], _getEnCode());

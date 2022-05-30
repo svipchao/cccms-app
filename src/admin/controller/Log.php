@@ -41,27 +41,22 @@ class Log extends Base
      */
     public function index()
     {
-        $params = $this->app->request->get(['limit' => 10, 'page' => 1, 'user_id' => 0, 'like_user_str' => '']);
-        if ($params['like_user_str']) {
-            $res = SysUser::mk()->auth()->limit(10)->where([
-                ['nickname|username', 'like', '%' . $params['like_user_str'] . '%'],
-            ])->field('id,nickname,username')->_list();
-            _result([
-                'code' => 200,
-                'msg' => 'success',
-                'data' => $res
-            ], _getEnCode());
-        } else {
-            $res = $this->model->auth($params['user_id'])->order(['id desc'])->with('user')->_page($params);
-            _result([
-                'code' => 200,
-                'msg' => 'success',
-                'data' => [
-                    'fields' => AuthService::instance()->fields('sys_log'),
-                    'total' => $res['total'],
-                    'data' => $res['data']
-                ]
-            ], _getEnCode());
-        }
+        $params = $this->app->request->get([
+            'page' => 1,
+            'limit' => 10,
+            'user' => ''
+        ]);
+        $data = $this->model->auth()->with(['user'])->withSearch(['user'], [
+            'user' => $params['user']
+        ])->order('id desc')->_page($params);
+        _result([
+            'code' => 200,
+            'msg' => 'success',
+            'data' => [
+                'fields' => AuthService::instance()->fields('sys_log'),
+                'total' => $data['total'],
+                'data' => $data['data']
+            ]
+        ], _getEnCode());
     }
 }
