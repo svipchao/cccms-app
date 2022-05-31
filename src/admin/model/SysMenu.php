@@ -18,7 +18,7 @@ class SysMenu extends Model
     // 删除前
     public static function onBeforeDelete($model)
     {
-        if (in_array($model['id'], MenuService::instance()->getMenuChildren((int)$model['id'], false))) {
+        if (!empty(MenuService::instance()->getMenuChildren((int)$model['id'], false))) {
             _result(['code' => 403, 'msg' => '存在子级菜单，禁止删除'], _getEnCode());
         }
     }
