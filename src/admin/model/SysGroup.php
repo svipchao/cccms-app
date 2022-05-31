@@ -31,7 +31,7 @@ class SysGroup extends Model
         if (!in_array($model['id'], AuthService::instance()->getUserGroups(true))) {
             _result(['code' => 403, 'msg' => '未拥有该组织'], _getEnCode());
         }
-        if (in_array($model['id'], AuthService::instance()->getGroupChildren((int)$model['id'], false))) {
+        if (!empty(AuthService::instance()->getGroupChildren((int)$model['id'], false))) {
             _result(['code' => 403, 'msg' => '存在子级组织，禁止删除'], _getEnCode());
         }
     }

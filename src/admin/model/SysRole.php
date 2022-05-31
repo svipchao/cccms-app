@@ -33,7 +33,7 @@ class SysRole extends Model
         if (!in_array($model['id'], AuthService::instance()->getUserRoles(true))) {
             _result(['code' => 403, 'msg' => '未拥有该角色'], _getEnCode());
         }
-        if (in_array($model['id'], AuthService::instance()->getRoleChildren((int)$model['id'], false))) {
+        if (!empty(AuthService::instance()->getRoleChildren((int)$model['id'], false))) {
             _result(['code' => 403, 'msg' => '存在子级角色，禁止删除'], _getEnCode());
         }
     }
