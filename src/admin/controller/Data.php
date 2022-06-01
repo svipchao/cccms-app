@@ -27,12 +27,12 @@ class Data extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_data|role_id,table,field|true');
-        if ($this->model->create($params)) {
-            _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '添加失败'], _getEnCode());
-        }
+        $this->model->create(_validate('post', [
+            'sys_data',
+            'role_id,table,field',
+            'true'
+        ]));
+        _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
     /**
@@ -45,11 +45,8 @@ class Data extends Base
     public function delete()
     {
         $params = _validate('delete', 'sys_data|id,table,role_id,field');
-        if ($this->model->_delete(['id' => $params['id']])) {
-            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
-        }
+        $this->model->_delete(['id' => $params['id']]);
+        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -61,12 +58,12 @@ class Data extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'sys_data|id,table,role_id,field|true');
-        if ($this->model->update($params)) {
-            _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '添加失败'], _getEnCode());
-        }
+        $this->model->update(_validate('put', [
+            'sys_data',
+            'id,table,role_id,field',
+            'true',
+        ]));
+        _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
     /**
@@ -78,12 +75,12 @@ class Data extends Base
      */
     public function index()
     {
-        $params = $this->app->request->get([
+        $params = _validate('get', ['sys_data', '', [
             'limit' => 15,
             'page' => 1,
             'role_id' => null,
-            'table' => null
-        ]);
+            'table' => null,
+        ]]);
         $tableInfo = InitService::instance()->getTables();
         $data = $this->model->with('role')->withSearch(['role_id', 'table'], [
             'role_id' => $params['role_id'],

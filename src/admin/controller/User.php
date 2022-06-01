@@ -28,8 +28,11 @@ class User extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'SysUser|nickname,username,password|group_ids');
-        $this->model->create($params);
+        $this->model->create(_validate('post', [
+            'sys_user',
+            'nickname,username,password',
+            'group_ids',
+        ]));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -42,11 +45,8 @@ class User extends Base
      */
     public function delete()
     {
-        if ($this->model->_delete($this->request->delete('id/d', 0))) {
-            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '删除失败，数据不存在'], _getEnCode());
-        }
+        $this->model->_delete($this->request->delete('id/d', 0));
+        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -58,8 +58,12 @@ class User extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'SysUser|id|group_ids,nickname,username');
-        $this->model->update($params);
+        $this->model->update(_validate('put', [
+            'sys_user',
+            'id',
+            'group_ids,nickname,username,password',
+//            'group_ids,nickname,username,password,avatar,intro,status,type',
+        ]));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
@@ -72,14 +76,14 @@ class User extends Base
      */
     public function index()
     {
-        $params = $this->request->get([
+        $params = _validate('get', ['sys_user', '', [
             'group_id' => null,
             'type' => null,
             'nickname' => '',
             'username' => '',
             'limit' => 10,
             'page' => 1
-        ]);
+        ]]);
         $users = $this->model->with('groups')->withSearch(['nickname', 'username', 'group_id', 'type'], [
             'nickname' => $params['nickname'],
             'username' => $params['username'],

@@ -27,12 +27,12 @@ class Config extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_config|type_id,key,val|desc,false');
-        if ($this->model->create($params)) {
-            _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '添加失败'], _getEnCode());
-        }
+        $this->model->create(_validate('post', [
+            'sys_config',
+            'type_id,key,val',
+            'desc,false'
+        ]));
+        _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
     /**
@@ -44,11 +44,8 @@ class Config extends Base
      */
     public function delete()
     {
-        if ($this->model->_delete($this->request->delete('id/d', 0))) {
-            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
-        }
+        $this->model->_delete($this->request->delete('id/d', 0));
+        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**

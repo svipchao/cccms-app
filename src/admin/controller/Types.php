@@ -27,8 +27,7 @@ class Types extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_types|type,name,alias,sort');
-        $this->model->create($params);
+        $this->model->create(_validate('post', 'sys_types|type,name,alias,sort'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -41,11 +40,8 @@ class Types extends Base
      */
     public function delete()
     {
-        if ($this->model->_delete($this->request->delete('id/d', 0))) {
-            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
-        }
+        $this->model->_delete($this->request->delete('id/d', 0));
+        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -57,12 +53,8 @@ class Types extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'sys_types|id,type,name,alias,sort');
-        if ($this->model->update($params)) {
-            _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '更新失败'], _getEnCode());
-        }
+        $this->model->update(_validate('put', 'sys_types|id,type,name,alias,sort'));
+        _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
     /**
@@ -74,11 +66,11 @@ class Types extends Base
      */
     public function index()
     {
-        $params = $this->request->get([
+        $params = _validate('get', ['sys_types', '', [
             'limit' => 10,
             'page' => 1,
             'type' => 0
-        ]);
+        ]]);
         $data = $this->model->withSearch(['type'], [
             'type' => $params['type']
         ])->_page($params);

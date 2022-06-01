@@ -89,7 +89,7 @@ class SysUser extends Model
             if (is_string($value)) {
                 $value = explode(',', $value);
             }
-            $value = implode(',', array_intersect(AuthService::instance()->getUserGroups(true), $value));
+            $value = implode(',', array_intersect(AuthService::instance()->getUserGroups(true), $value ?: []));
         }
         if (!empty($value)) {
             $query->hasWhere('userGroups', function ($query) use ($value) {

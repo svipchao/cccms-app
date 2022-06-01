@@ -28,8 +28,11 @@ class Role extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_role|role_name|role_id,role_desc,nodes');
-        $this->model->create($params);
+        $this->model->create(_validate('post', [
+            'sys_role',
+            'role_name',
+            'role_id,role_desc,nodes',
+        ]));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -42,11 +45,8 @@ class Role extends Base
      */
     public function delete()
     {
-        if ($this->model->_delete($this->request->delete('id/d', 0))) {
-            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '删除失败，数据不存在'], _getEnCode());
-        }
+        $this->model->_delete($this->request->delete('id/d', 0));
+        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -58,8 +58,11 @@ class Role extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'sys_role|id|role_name,role_id,role_desc,status,nodes');
-        $this->model->update($params);
+        $this->model->update(_validate('put', [
+            'sys_role',
+            'id',
+            'role_name,role_id,role_desc,status,nodes',
+        ]));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 

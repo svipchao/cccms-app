@@ -27,12 +27,12 @@ class Route extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_route|type_id,alias,url,name|true');
-        if ($this->model->create($params)) {
-            _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '添加失败'], _getEnCode());
-        }
+        $this->model->create(_validate('post', [
+            'sys_route',
+            'type_id,alias,url,name',
+            'true',
+        ]));
+        _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
     /**
@@ -44,11 +44,8 @@ class Route extends Base
      */
     public function delete()
     {
-        if ($this->model->_delete($this->request->delete('id/d', 0))) {
-            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
-        }
+        $this->model->_delete($this->request->delete('id/d', 0));
+        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -60,12 +57,8 @@ class Route extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'sys_route|id|true');
-        if ($this->model->update($params)) {
-            _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '更新失败'], _getEnCode());
-        }
+        $this->model->update(_validate('put', 'sys_route|id|true'));
+        _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
     /**

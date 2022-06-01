@@ -28,13 +28,8 @@ class Menu extends Base
      */
     public function create()
     {
-        $params = _validate('post', 'sys_menu|type_id,name,url|true');
-        // 判断类别是否属于菜单
-        if ($this->model->create($params)) {
-            _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '添加失败'], _getEnCode());
-        }
+        $this->model->create(_validate('post', 'sys_menu|type_id,name,url|true'));
+        _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
     /**
@@ -46,11 +41,8 @@ class Menu extends Base
      */
     public function delete()
     {
-        if ($this->model->_delete($this->request->delete('id/d', 0))) {
-            _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '删除失败'], _getEnCode());
-        }
+        $this->model->_delete($this->request->delete('id/d', 0));
+        _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
     /**
@@ -62,12 +54,7 @@ class Menu extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'sys_menu|id|true');
-        if ($this->model->update($params)) {
-            _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '更新失败'], _getEnCode());
-        }
+        $this->model->update(_validate('put', 'sys_menu|id|true'));
     }
 
     /**

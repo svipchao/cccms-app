@@ -62,12 +62,13 @@ class File extends Base
      */
     public function update()
     {
-        $params = _validate('put', 'sys_file|id|file_name,file_desc,extract_code,status,false');
-        if ($this->model->update($params)) {
-            _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
-        } else {
-            _result(['code' => 403, 'msg' => '更新失败'], _getEnCode());
-        }
+        $params = _validate('put', [
+            'sys_file',
+            'id',
+            'file_name,file_desc,extract_code,status,false',
+        ]);
+        $this->model->update($params);
+        _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
     /**
@@ -79,14 +80,14 @@ class File extends Base
      */
     public function index()
     {
-        $params = $this->app->request->get([
+        $params = _validate('get', ['sys_file', '', [
             'page' => 1,
-            'limit' => 10,
+            'limit' => 15,
             'type_id' => 0,
             'user' => ''
-        ]);
+        ]]);
         $data = $this->model->auth()->with(['type', 'user'])->withSearch(['type_id', 'user'], [
-            'type_id' => $this->request->get('type_id/d', 0),
+            'type_id' => $params['type_id'],
             'user' => $params['user']
         ])->order('id desc')->_page($params);
         _result([
