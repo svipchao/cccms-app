@@ -79,14 +79,12 @@ class User extends Base
         $params = _validate('get', ['sys_user', '', [
             'group_id' => null,
             'type' => null,
-            'nickname' => '',
-            'username' => '',
+            'user' => '',
             'limit' => 10,
             'page' => 1
         ]]);
-        $users = $this->model->with('groups')->withSearch(['nickname', 'username', 'group_id', 'type'], [
-            'nickname' => $params['nickname'],
-            'username' => $params['username'],
+        $users = $this->model->with('groups')->withSearch(['user', 'group_id', 'type'], [
+            'user' => $params['user'],
             'group_id' => $params['group_id'],
             'type' => $params['type'],
         ])->_page($params, false, function ($item) {

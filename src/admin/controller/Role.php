@@ -105,7 +105,9 @@ class Role extends Base
         if ($role_id == 0 && AuthService::instance()->isAdmin()) {
             $nodes = array_keys($allNodes);
         } else {
-            $nodes = $this->model->_read($role_id)->nodes()->column('node');
+            $nodes = $this->model->_read($role_id, function ($data) {
+                return $data->nodes->column('node');
+            });
         }
         // 框架节点
         $frameNodes = NodeService::instance()->getFrameNodes();

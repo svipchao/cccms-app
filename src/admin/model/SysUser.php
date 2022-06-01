@@ -68,16 +68,10 @@ class SysUser extends Model
         return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id');
     }
 
-    // 用户昵称搜索器
-    public function searchNickNameAttr($query, $value, $data)
+    // 用户搜索器
+    public function searchUserAttr($query, $value, $data)
     {
-        $query->where('nickname', 'like', '%' . $value . '%');
-    }
-
-    // 用户账号搜索器
-    public function searchUserNameAttr($query, $value, $data)
-    {
-        $query->where('nickname', 'like', '%' . $value . '%');
+        $query->where('nickname|username', 'like', '%' . $value . '%');
     }
 
     // 组织用户搜索器
