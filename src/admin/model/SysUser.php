@@ -26,6 +26,9 @@ class SysUser extends Model
     public static function onAfterWrite($model)
     {
         if (isset($model['group_ids'])) {
+            if (is_string($model['group_ids'])) {
+                $model['group_ids'] = explode(',', $model['group_ids']);
+            }
             // 删除组织关联权限节点表数据
             $model->append([])->groups()->detach();
             $model->append([])->groups()->attach($model['group_ids']);
