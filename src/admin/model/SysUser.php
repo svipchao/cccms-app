@@ -14,7 +14,7 @@ class SysUser extends Model
     // 写入前
     public static function onBeforeWrite($model)
     {
-        if (empty($model['groups_ids'])) {
+        if (empty($model['group_ids'])) {
             _result(['code' => 403, 'msg' => '请为用户指定一个组织'], _getEnCode());
         }
         if (!isset($model['id'])) {
