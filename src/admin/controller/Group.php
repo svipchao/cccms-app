@@ -78,7 +78,9 @@ class Group extends Base
      */
     public function index()
     {
-        $groups = $this->model->with('roles')->_list(null, function ($item) {
+        $groups = $this->model->with('roles')->where([
+            ['id', 'in', AuthService::instance()->getUserGroups(true)]
+        ])->_list(null, function ($item) {
             $item['role_ids'] = array_column($item['roles'], 'id');
             return $item;
         });

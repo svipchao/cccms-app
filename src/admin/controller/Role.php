@@ -75,7 +75,9 @@ class Role extends Base
      */
     public function index()
     {
-        $roles = $this->model->with(['groups', 'nodes'])->_list(null, function ($item) {
+        $roles = $this->model->with(['groups', 'nodes'])->where([
+            ['id', 'in', AuthService::instance()->getUserRoles(true)]
+        ])->_list(null, function ($item) {
             $item['nodes'] = array_column($item['nodes'], 'node');
             $item['group_ids'] = array_column($item['groups'], 'id');
             return $item;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace app\admin\model;
 
 use think\facade\Cache;
+use think\model\relation\HasMany;
 use think\model\relation\belongsToMany;
 use cccms\Model;
 use cccms\services\AuthService;
@@ -16,7 +17,7 @@ class SysGroup extends Model
     public static function onAfterWrite($model)
     {
         Cache::delete('SysGroups');
-        if (isset($model['role_ids'])) {
+        if (isset($model['role_ids']) && !empty($model['role_ids'])) {
             if (is_string($model['role_ids'])) {
                 $model['role_ids'] = explode(',', $model['role_ids']);
             }
@@ -74,5 +75,10 @@ class SysGroup extends Model
             }
         }
         return (int)$value;
+    }
+
+    public function setStatusAttr($value, $data): int
+    {
+        return (int)($value ?: 1);
     }
 }
