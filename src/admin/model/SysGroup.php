@@ -76,9 +76,4 @@ class SysGroup extends Model
         }
         return (int)$value;
     }
-
-    public function setStatusAttr($value, $data): int
-    {
-        return (int)($value ?: 1);
-    }
 }
