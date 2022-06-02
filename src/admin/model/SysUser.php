@@ -128,8 +128,8 @@ class SysUser extends Model
     }
 
     // 获取用户类型
-    public function getTypeTextAttr($value, $data): string
+    public function getTypeTextAttr($value, $data)
     {
-        return config('cccms.user.types')[$data['type']];
+        return isset($data['type']) ? config('cccms.user.types')[$data['type']] ?? '未知' : false;
     }
 }

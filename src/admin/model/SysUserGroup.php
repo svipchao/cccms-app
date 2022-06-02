@@ -12,8 +12,6 @@ class SysUserGroup extends Pivot
     {
         if (in_array($value, AuthService::instance()->getUserGroups(true))) {
             return $value;
-        } else {
-            return false;
         }
     }
 }

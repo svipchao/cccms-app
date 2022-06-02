@@ -31,7 +31,7 @@ class Group extends Base
         $this->model->create(_validate('post', [
             'sys_group',
             'group_name',
-            'role_ids,user_ids,true',
+            'role_ids,user_ids,group_desc',
         ]));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
@@ -58,11 +58,13 @@ class Group extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', [
-            'sys_group',
-            'id',
-            'role_ids,user_ids,true',
-        ]));
+        $this->model->update(_validate('put', ['sys_group', 'id', [
+            'role_ids',
+            'user_ids',
+            'group_name',
+            'group_desc',
+            'status' => 1,
+        ]]));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 

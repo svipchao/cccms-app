@@ -30,7 +30,7 @@ class Data extends Base
         $this->model->create(_validate('post', [
             'sys_data',
             'role_id,table,field',
-            'true'
+            'where,value'
         ]));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
@@ -61,7 +61,7 @@ class Data extends Base
         $this->model->update(_validate('put', [
             'sys_data',
             'id,table,role_id,field',
-            'true',
+            'where,value'
         ]));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }

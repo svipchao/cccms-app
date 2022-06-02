@@ -58,11 +58,13 @@ class Role extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', [
-            'sys_role',
-            'id',
-            'role_name,role_id,role_desc,status,nodes',
-        ]));
+        $this->model->update(_validate('put', ['sys_role', 'id', [
+            'role_name',
+            'role_id',
+            'role_desc',
+            'nodes',
+            'status' => 1,
+        ]]));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
@@ -104,8 +106,12 @@ class Role extends Base
         $role_id = $this->request->get('role_id/d', 0);
         // 全部节点
         $allNodes = NodeService::instance()->getNodesInfo();
-        if ($role_id == 0 && AuthService::instance()->isAdmin()) {
-            $nodes = array_keys($allNodes);
+        if ($role_id === 0) {
+            if (AuthService::instance()->isAdmin()) {
+                $nodes = array_keys($allNodes);
+            } else {
+                $nodes = AuthService::instance()->getUserNodes();
+            }
         } else {
             $nodes = $this->model->_read($role_id, function ($data) {
                 return $data->nodes->column('node');
