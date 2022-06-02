@@ -79,10 +79,11 @@ class File extends Base
      */
     public function index()
     {
-        $params = _validate('get', ['sys_file', '', ['type_id' => 0], [
+        $params = _validate('get', ['sys_file', 'file_name,aaa', ['type_id' => 0, 'true', 'ddd'], [
             'page' => 1,
             'limit' => 15,
-            'user' => ''
+            'user' => '',
+            'addas'
         ]]);
         $data = $this->model->auth()->with(['type', 'user'])->withSearch(['type_id', 'user'], [
             'type_id' => $params['type_id'],
