@@ -88,7 +88,7 @@ class Data extends Base
         ])->_page($params, false, function ($item) use ($tableInfo) {
             $tableInfo = $tableInfo[$item['table']];
             $item['table_name'] = $tableInfo['table_name'] ?? '未知';
-            $item['field_name'] = explode('|', $tableInfo['fields'][$item['field']] ?? '|未知')[1];
+            $item['field_name'] = $tableInfo['fields'][$item['field']] ?? '未知';
             return $item;
         });
         _result([

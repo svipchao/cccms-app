@@ -85,6 +85,12 @@ class File extends Base
             'user' => '',
             'addas'
         ]]);
+        halt($params);
+//        $params = _validate('get', ['sys_file', '', ['type_id' => 0, 'true'], [
+//            'page' => 1,
+//            'limit' => 15,
+//            'user' => '',
+//        ]]);
         $data = $this->model->auth()->with(['type', 'user'])->withSearch(['type_id', 'user'], [
             'type_id' => $params['type_id'],
             'user' => $params['user']
