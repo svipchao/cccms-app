@@ -75,7 +75,7 @@ class Data extends Base
      */
     public function index()
     {
-        $params = _validate('get', ['sys_data', '', [
+        $params = _validate('get', ['sys_data', '', '', [
             'limit' => 15,
             'page' => 1,
             'role_id' => null,

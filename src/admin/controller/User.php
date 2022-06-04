@@ -76,7 +76,7 @@ class User extends Base
      */
     public function index()
     {
-        $params = _validate('get', ['sys_user', '', [
+        $params = _validate('get', ['sys_user', '', '', [
             'group_id' => null,
             'type' => null,
             'user' => '',
