@@ -54,7 +54,9 @@ class User extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', 'sys_user|id|group_ids,true'));
+        $this->model->update(_validate('put', 'sys_user|id|group_ids,true', [
+            'password|密码' => 'alphaNum|length:5,32',
+        ]));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 

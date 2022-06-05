@@ -49,6 +49,11 @@ class SysUser extends Model
         $model->groups()->detach();
     }
 
+    public function demo()
+    {
+        return $this->hasManyThrough(SysRole::class, SysGroup::class, 'user_id', 'id', 'id', 'id');
+    }
+
     // 关联组织
     public function groups(): BelongsToMany
     {
