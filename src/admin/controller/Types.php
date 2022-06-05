@@ -27,7 +27,7 @@ class Types extends Base
      */
     public function create()
     {
-        $this->model->create(_validate('post', 'sys_types|type,name,alias,sort'));
+        $this->model->create(_validate('post', 'sys_types||true'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -53,7 +53,7 @@ class Types extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', 'sys_types|id,type,name,alias,sort'));
+        $this->model->update(_validate('put', 'sys_types|id|true'));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 

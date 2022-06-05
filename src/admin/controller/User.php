@@ -28,11 +28,7 @@ class User extends Base
      */
     public function create()
     {
-        $this->model->create(_validate('post', [
-            'sys_user',
-            'nickname,username,password',
-            'group_ids',
-        ]));
+        $this->model->create(_validate('post', 'sys_user|nickname,username,password|group_ids,true'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -58,12 +54,7 @@ class User extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', [
-            'sys_user',
-            'id',
-            'group_ids,nickname,username,password',
-//            'group_ids,nickname,username,password,avatar,intro,status,type',
-        ]));
+        $this->model->update(_validate('put', 'sys_user|id|group_ids,true'));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
@@ -76,12 +67,12 @@ class User extends Base
      */
     public function index()
     {
-        $params = _validate('get', ['sys_user', '', '', [
+        $params = _validate('get', ['sys_user', '', [
+            'page' => 1,
+            'limit' => 10,
             'group_id' => null,
             'type' => null,
             'user' => '',
-            'limit' => 10,
-            'page' => 1
         ]]);
         $users = $this->model->with('groups')->withSearch(['user', 'group_id', 'type'], [
             'user' => $params['user'],

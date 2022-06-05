@@ -42,9 +42,7 @@ class SysData extends Model
     // 表名搜索器
     public function searchTableAttr($query, $value, $data)
     {
-        if (!empty($value)) {
-            $query->where('table', '=', $value);
-        }
+        $query->where('table', '=', $value);
     }
 
     public function setRoleIdAttr($value)

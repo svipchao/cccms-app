@@ -28,11 +28,7 @@ class Role extends Base
      */
     public function create()
     {
-        $this->model->create(_validate('post', [
-            'sys_role',
-            'role_name',
-            'role_id,role_desc,nodes',
-        ]));
+        $this->model->create(_validate('post', 'sys_role|role_name|nodes,true'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -58,13 +54,7 @@ class Role extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', ['sys_role', 'id', [
-            'role_name',
-            'role_id',
-            'role_desc',
-            'nodes',
-            'status' => 1,
-        ]]));
+        $this->model->update(_validate('put', 'sys_role|id|nodes,true'));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 

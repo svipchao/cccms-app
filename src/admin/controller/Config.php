@@ -27,11 +27,7 @@ class Config extends Base
      */
     public function create()
     {
-        $this->model->create(_validate('post', [
-            'sys_config',
-            'type_id,key,val',
-            'desc,false'
-        ]));
+        $this->model->create(_validate('post', 'sys_config|type_id,key,val|desc,false'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -79,7 +75,7 @@ class Config extends Base
      */
     public function index()
     {
-        $data = $this->model->withSearch(['type_id'], [
+        $data = $this->model->_withSearch('type_id', [
             'type_id' => $this->request->get('type_id/d', 0)
         ])->_list(null, function ($item) {
             $item['configure'] = json_decode($item['configure'], true);

@@ -27,11 +27,7 @@ class Data extends Base
      */
     public function create()
     {
-        $this->model->create(_validate('post', [
-            'sys_data',
-            'role_id,table,field',
-            'where,value'
-        ]));
+        $this->model->create(_validate('post', 'sys_data|role_id,table,field|where,value'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -58,11 +54,7 @@ class Data extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', [
-            'sys_data',
-            'id,table,role_id,field',
-            'where,value'
-        ]));
+        $this->model->update(_validate('put', 'sys_data|id,table,role_id,field|where,value'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -75,14 +67,14 @@ class Data extends Base
      */
     public function index()
     {
-        $params = _validate('get', ['sys_data', '', '', [
+        $params = _validate('get', ['sys_data', '', [
             'limit' => 15,
             'page' => 1,
-            'role_id' => null,
+            'role_id' => 0,
             'table' => null,
         ]]);
         $tableInfo = InitService::instance()->getTables();
-        $data = $this->model->with('role')->withSearch(['role_id', 'table'], [
+        $data = $this->model->with('role')->_withSearch('role_id,table', [
             'role_id' => $params['role_id'],
             'table' => $params['table']
         ])->_page($params, false, function ($item) use ($tableInfo) {
