@@ -20,10 +20,8 @@ class SysLog extends Model
 
     public function searchUserAttr($query, $value, $data)
     {
-        if (!empty($value)) {
-            $query->hasWhere('user', function ($query) use ($value) {
-                $query->where('nickname|username', 'like', "%" . $value . "%");
-            });
-        }
+        $query->hasWhere('user', function ($query) use ($value) {
+            $query->where('nickname|username', 'like', "%" . $value . "%");
+        });
     }
 }

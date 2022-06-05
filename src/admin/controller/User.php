@@ -72,13 +72,13 @@ class User extends Base
             'limit' => 10,
             'group_id' => null,
             'type' => null,
-            'user' => '',
+            'user' => null,
         ]]);
-        $users = $this->model->with('groups')->withSearch(['user', 'group_id', 'type'], [
-            'user' => $params['user'],
+        $users = $this->model->with('groups')->_withSearch('user,group_id,type', [
             'group_id' => $params['group_id'],
             'type' => $params['type'],
-        ])->_page($params, false, function ($item) {
+            'user' => $params['user'],
+        ])->auth()->_page($params, false, function ($item) {
             $item['group_ids'] = array_column($item['groups'], 'id');
             return $item;
         });

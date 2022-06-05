@@ -54,14 +54,7 @@ class Group extends Base
      */
     public function update()
     {
-        $this->model->update(_validate('put', ['sys_group', 'id', [
-            'group_id',
-            'role_ids',
-            'user_ids',
-            'group_name',
-            'group_desc',
-            'status',
-        ]]));
+        $this->model->update(_validate('put', 'sys_group|id|role_ids,user_ids,true'));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 

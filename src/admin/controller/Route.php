@@ -27,11 +27,7 @@ class Route extends Base
      */
     public function create()
     {
-        $this->model->create(_validate('post', [
-            'sys_route',
-            'type_id,alias,url,name',
-            'true',
-        ]));
+        $this->model->create(_validate('post', 'sys_route|type_id,alias,url,name|true'));
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -70,7 +66,7 @@ class Route extends Base
      */
     public function index()
     {
-        $data = $this->model->with('type')->withSearch(['type_id'], [
+        $data = $this->model->with('type')->_withSearch('type_id', [
             'type_id' => $this->request->get('type_id/d', 0)
         ])->_page($this->request->get(['page' => 1, 'limit' => 10]));
         _result([

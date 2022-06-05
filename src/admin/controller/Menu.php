@@ -66,7 +66,7 @@ class Menu extends Base
      */
     public function index()
     {
-        $data = $this->model->with('type')->withSearch(['type_id'], [
+        $data = $this->model->with('type')->_withSearch('type_id', [
             'type_id' => $this->request->get('type_id/d', 0)
         ])->_list();
         _result([

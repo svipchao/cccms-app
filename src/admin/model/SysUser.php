@@ -95,9 +95,7 @@ class SysUser extends Model
     // 用户类型搜索器
     public function searchTypeAttr($query, $value, $data)
     {
-        if ($value != null) {
-            $query->where('type', '=', $value);
-        }
+        $query->where('type', '=', $value);
     }
 
     // 获取当前用户拥有的组织下的所有用户

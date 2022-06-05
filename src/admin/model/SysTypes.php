@@ -51,9 +51,7 @@ class SysTypes extends Model
 
     public function searchTypeAttr($query, $value, $data)
     {
-        if (!empty($value)) {
-            $query->where('type', $value);
-        }
+        $query->where('type', $value);
     }
 
     public function getTypeTextAttr($value, $data): string

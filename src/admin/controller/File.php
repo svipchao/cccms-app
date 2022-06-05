@@ -83,13 +83,12 @@ class File extends Base
             'page' => 1,
             'limit' => 15,
             'type_id' => 0,
-            'user' => '',
-            'true'
+            'user' => null
         ]]);
-        $data = $this->model->auth()->with(['type', 'user'])->withSearch(['type_id', 'user'], [
+        $data = $this->model->with(['type', 'user'])->_withSearch('type_id,user', [
             'type_id' => $params['type_id'],
             'user' => $params['user']
-        ])->order('id desc')->_page($params);
+        ])->auth()->order('id desc')->_page($params);
         _result([
             'code' => 200,
             'msg' => 'success',

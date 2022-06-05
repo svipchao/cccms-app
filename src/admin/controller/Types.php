@@ -69,9 +69,9 @@ class Types extends Base
         $params = _validate('get', ['sys_types', '', [
             'limit' => 10,
             'page' => 1,
-            'type' => 0
+            'type' => null
         ]]);
-        $data = $this->model->withSearch(['type'], [
+        $data = $this->model->_withSearch('type', [
             'type' => $params['type']
         ])->_page($params);
         _result([
