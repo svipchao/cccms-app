@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace app\admin\model;
 
 use think\facade\Cache;
-use think\model\relation\HasMany;
 use cccms\Model;
-use cccms\extend\ArrExtend;
 use cccms\services\AuthService;
 use think\model\relation\BelongsToMany;
 
@@ -14,17 +12,15 @@ class SysRole extends Model
 {
     protected $hidden = ['pivot'];
 
+    public function getAllRoles(): array
+    {
+        return $this->field('id,role_id,role_name,role_desc')->_list();
+    }
+
     // 写入后
     public static function onAfterWrite($model)
     {
         Cache::delete('SysRoles');
-        if (isset($model['nodes'])) {
-            if (is_string($model['nodes'])) {
-                $model['nodes'] = explode(',', $model['nodes']);
-            }
-            $model->nodes()->delete();
-            $model->nodes()->saveAll(ArrExtend::createTwoArray($model['nodes'], 'node'));
-        }
     }
 
     // 删除前
@@ -38,27 +34,20 @@ class SysRole extends Model
         }
     }
 
-    // 删除后
-    public static function onAfterDelete($model)
-    {
-        $model->nodes()->delete();
-    }
-
     public function groups(): belongsToMany
     {
-        return $this->belongsToMany(SysGroup::class, SysGroupRole::class, 'group_id', 'role_id')
+        return $this->belongsToMany(SysGroup::class, SysAuth::class, 'group_id', 'role_id')
             ->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
     }
 
-    public function nodes(): HasMany
+    public function getNodesAttr($value): array
     {
-        return $this->hasMany(SysRoleNode::class, 'role_id', 'id')
-            ->where('role_id', 'in', AuthService::instance()->getUserRoles(true));
+        return explode(',', $value);
     }
 
-    public function loginNodes(): HasMany
+    public function setNodesAttr($value): string
     {
-        return $this->hasMany(SysRoleNode::class, 'role_id', 'id');
+        return implode(',', $value);
     }
 
     public function setRoleIdAttr($value, $data): int

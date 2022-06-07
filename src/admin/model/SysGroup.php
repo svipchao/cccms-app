@@ -12,6 +12,11 @@ class SysGroup extends Model
 {
     protected $hidden = ['pivot'];
 
+    public function getAllGroups(): array
+    {
+        return $this->field('id,group_id,group_name,group_desc')->_list();
+    }
+
     // 写入后
     public static function onAfterWrite($model)
     {
@@ -47,19 +52,19 @@ class SysGroup extends Model
 
     public function roles(): belongsToMany
     {
-        return $this->belongsToMany(SysRole::class, SysGroupRole::class, 'role_id', 'group_id')
+        return $this->belongsToMany(SysRole::class, SysAuth::class, 'role_id', 'group_id')
             ->wherePivot('role_id', 'in', AuthService::instance()->getUserRoles(true));
     }
 
     public function loginRoles(): belongsToMany
     {
-        return $this->belongsToMany(SysRole::class, SysGroupRole::class, 'role_id', 'group_id');
+        return $this->belongsToMany(SysRole::class, SysAuth::class, 'role_id', 'group_id');
     }
 
     // 关联用户
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(SysUser::class, SysUserGroup::class, 'user_id', 'group_id');
+        return $this->belongsToMany(SysUser::class, SysAuth::class, 'user_id', 'group_id');
     }
 
     public function setGroupIdAttr($value, $data): int
