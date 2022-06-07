@@ -41,12 +41,12 @@ class SysUser extends Model
         return $this->belongsToMany(SysGroup::class, SysAuth::class, 'group_id', 'user_id');
     }
 
-    public function searchUserAttr($query, $value, $data)
+    public function searchUserAttr($query, $value)
     {
         $query->where('nickname|username', 'like', '%' . $value . '%');
     }
 
-    public function searchGroupIdAttr($query, $value, $data)
+    public function searchGroupIdAttr($query, $value)
     {
         if (empty($value) && !AuthService::instance()->isAdmin()) {
             $value = implode(',', AuthService::instance()->getUserGroups(true));
@@ -63,12 +63,12 @@ class SysUser extends Model
         }
     }
 
-    public function searchTypeAttr($query, $value, $data)
+    public function searchTypeAttr($query, $value)
     {
         $query->where('type', '=', $value);
     }
 
-    public function setTokenAttr($value, $data): string
+    public function setTokenAttr($value): string
     {
         return md5(mt_rand(0, time()) . time());
     }

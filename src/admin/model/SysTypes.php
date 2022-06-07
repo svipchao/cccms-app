@@ -49,7 +49,7 @@ class SysTypes extends Model
         return $this->hasMany('SysFile', 'type_id', 'id');
     }
 
-    public function searchTypeAttr($query, $value, $data)
+    public function searchTypeAttr($query, $value)
     {
         $query->where('type', $value);
     }

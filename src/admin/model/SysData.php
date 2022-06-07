@@ -33,14 +33,14 @@ class SysData extends Model
     }
 
     // 角色ID搜索器
-    public function searchRoleIdAttr($query, $value, $data)
+    public function searchRoleIdAttr($query, $value)
     {
         $value = $value ?: implode(',', AuthService::instance()->getUserRoles(true));
         $query->where('role_id', 'in', $value);
     }
 
     // 表名搜索器
-    public function searchTableAttr($query, $value, $data)
+    public function searchTableAttr($query, $value)
     {
         $query->where('table', '=', $value);
     }

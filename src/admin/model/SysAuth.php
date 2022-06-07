@@ -8,8 +8,6 @@ use cccms\services\NodeService;
 
 class SysAuth extends Pivot
 {
-    protected $globalScope = [];
-
     /**
      * 创建模型实例
      * @return static
@@ -21,17 +19,16 @@ class SysAuth extends Pivot
 
     protected function getAuths(): array
     {
-        return $this->_list();
+        return $this->select()->toArray();
     }
 
     protected function isAdmin($user_id = null): bool
     {
-        return ($user_id ?: _getAccessToken('id')) == 1;
+        return $user_id == 1;
     }
 
     protected function getUserAuths($user_id = null): array
     {
-        $user_id = $user_id ?: _getAccessToken('id');
         if (empty($user_id)) return array_pad([], 3, []);
         $auths = $this->getAuths();
         $group_ids = $role_ids = [];

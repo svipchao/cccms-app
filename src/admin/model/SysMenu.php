@@ -32,7 +32,7 @@ class SysMenu extends Model
     }
 
     // 类别搜索器
-    public function searchTypeIdAttr($query, $value, $data)
+    public function searchTypeIdAttr($query, $value)
     {
         $types = TypesService::instance()->getTypes(1, 'id');
         if (empty($types)) {

@@ -29,14 +29,14 @@ class SysFile extends Model
         ]);
     }
 
-    public function searchUserAttr($query, $value, $data)
+    public function searchUserAttr($query, $value)
     {
         $query->hasWhere('user', function ($query) use ($value) {
             $query->where('nickname|username', 'like', "%" . $value . "%");
         });
     }
 
-    public function searchTypeIdAttr($query, $value, $data)
+    public function searchTypeIdAttr($query, $value)
     {
         $types = TypesService::instance()->getTypes(4, 'id');
         if (empty($types)) {

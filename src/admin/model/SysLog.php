@@ -18,7 +18,7 @@ class SysLog extends Model
         ]);
     }
 
-    public function searchUserAttr($query, $value, $data)
+    public function searchUserAttr($query, $value)
     {
         $query->hasWhere('user', function ($query) use ($value) {
             $query->where('nickname|username', 'like', "%" . $value . "%");
