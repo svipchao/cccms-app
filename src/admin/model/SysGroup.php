@@ -10,8 +10,6 @@ use cccms\services\AuthService;
 
 class SysGroup extends Model
 {
-    protected $hidden = ['pivot'];
-
     public function getAllGroups(): array
     {
         return $this->field('id,group_id,group_name,group_desc')->_list();
@@ -51,12 +49,6 @@ class SysGroup extends Model
     }
 
     public function roles(): belongsToMany
-    {
-        return $this->belongsToMany(SysRole::class, SysAuth::class, 'role_id', 'group_id')
-            ->wherePivot('role_id', 'in', AuthService::instance()->getUserRoles(true));
-    }
-
-    public function loginRoles(): belongsToMany
     {
         return $this->belongsToMany(SysRole::class, SysAuth::class, 'role_id', 'group_id');
     }

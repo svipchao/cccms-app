@@ -3,25 +3,12 @@ declare(strict_types=1);
 
 namespace app\admin\model;
 
-use think\model\relation\{hasMany, BelongsToMany};
+use think\model\relation\BelongsToMany;
 use cccms\Model;
 use cccms\services\AuthService;
 
 class SysUser extends Model
 {
-    protected $append = ['type_text'];
-
-    // 写入前
-    public static function onBeforeWrite($model)
-    {
-        if (empty($model['group_ids'])) {
-            _result(['code' => 403, 'msg' => '请为用户指定一个组织'], _getEnCode());
-        }
-        if (!isset($model['id'])) {
-            $model['token'] = md5(mt_rand(0, time()) . time());
-        }
-    }
-
     // 写入后
     public static function onAfterWrite($model)
     {
@@ -30,15 +17,15 @@ class SysUser extends Model
                 $model['group_ids'] = explode(',', $model['group_ids']);
             }
             // 删除组织关联权限节点表数据
-            $model->append([])->groups()->detach();
-            $model->append([])->groups()->attach($model['group_ids']);
+            $model->groups()->detach();
+            $model->groups()->attach($model['group_ids']);
         }
     }
 
     // 删除前
     public static function onBeforeDelete($model)
     {
-        if ($model['id'] === _getAccessToken('id')) {
+        if ($model['id'] === AuthService::instance()->getUserInfo('id')) {
             _result(['code' => 403, 'msg' => '禁止删除自己的账户'], _getEnCode());
         }
     }
@@ -49,37 +36,16 @@ class SysUser extends Model
         $model->groups()->detach();
     }
 
-    public function demo()
-    {
-        return $this->hasManyThrough(SysRole::class, SysGroup::class, 'user_id', 'id', 'id', 'id');
-    }
-
-    // 关联组织
     public function groups(): BelongsToMany
     {
-        return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id')
-            ->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
+        return $this->belongsToMany(SysGroup::class, SysAuth::class, 'group_id', 'user_id');
     }
 
-    // 关联用户组织中间表
-    public function userGroups(): hasMany
-    {
-        return $this->hasMany(SysUserGroup::class, 'user_id', 'id');
-    }
-
-    // 关联组织
-    public function loginGroups(): BelongsToMany
-    {
-        return $this->belongsToMany(SysGroup::class, SysUserGroup::class, 'group_id', 'user_id');
-    }
-
-    // 用户搜索器
     public function searchUserAttr($query, $value, $data)
     {
         $query->where('nickname|username', 'like', '%' . $value . '%');
     }
 
-    // 组织用户搜索器
     public function searchGroupIdAttr($query, $value, $data)
     {
         if (empty($value) && !AuthService::instance()->isAdmin()) {
@@ -97,24 +63,16 @@ class SysUser extends Model
         }
     }
 
-    // 用户类型搜索器
     public function searchTypeAttr($query, $value, $data)
     {
         $query->where('type', '=', $value);
     }
 
-    // 获取当前用户拥有的组织下的所有用户
-    public function getCurrentUserGroupUser(): array
+    public function setTokenAttr($value, $data): string
     {
-        if (AuthService::instance()->isAuth('admin/group/index')) {
-            $groupIds = AuthService::instance()->getUserGroups(true);
-            return SysUserGroup::where('group_id', 'in', $groupIds)->column('user_id');
-        } else {
-            return [AuthService::instance()->getUserInfo('id')];
-        }
+        return md5(mt_rand(0, time()) . time());
     }
 
-    // 设置密码
     public function setPassWordAttr($value, $data)
     {
         if (empty($value)) {
@@ -124,13 +82,22 @@ class SysUser extends Model
         return md5($value);
     }
 
-    // 获取密码
+    public function setStatusAttr($value, $data)
+    {
+        if (AuthService::instance()->isAdmin()) {
+            _result(['code' => 403, 'msg' => '不能禁止管理员账号'], _getEnCode());
+        }
+        if ($data['id'] == AuthService::instance()->getUserInfo('id')) {
+            _result(['code' => 403, 'msg' => '不能禁止自己的账户'], _getEnCode());
+        }
+        return $value;
+    }
+
     public function getPassWordAttr(): string
     {
         return '';
     }
 
-    // 获取用户类型
     public function getTypeTextAttr($value, $data)
     {
         return isset($data['type']) ? config('cccms.user.types')[$data['type']] ?? '未知' : false;

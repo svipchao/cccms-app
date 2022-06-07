@@ -10,8 +10,6 @@ use think\model\relation\BelongsToMany;
 
 class SysRole extends Model
 {
-    protected $hidden = ['pivot'];
-
     public function getAllRoles(): array
     {
         return $this->field('id,role_id,role_name,role_desc')->_list();
@@ -36,8 +34,7 @@ class SysRole extends Model
 
     public function groups(): belongsToMany
     {
-        return $this->belongsToMany(SysGroup::class, SysAuth::class, 'group_id', 'role_id')
-            ->wherePivot('group_id', 'in', AuthService::instance()->getUserGroups(true));
+        return $this->belongsToMany(SysGroup::class, SysAuth::class, 'group_id', 'role_id');
     }
 
     public function getNodesAttr($value): array

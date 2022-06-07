@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace app\admin\model;
 
-use think\model\relation\{HasOne, belongsTo};
+use think\model\relation\HasOne;
 use cccms\Model;
 use cccms\services\TypesService;
 
@@ -36,7 +36,6 @@ class SysFile extends Model
         });
     }
 
-    // 类别搜索器
     public function searchTypeIdAttr($query, $value, $data)
     {
         $types = TypesService::instance()->getTypes(4, 'id');

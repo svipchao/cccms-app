@@ -3,12 +3,21 @@ declare(strict_types=1);
 
 namespace app\admin\model;
 
-use cccms\Model;
+use think\model\Pivot;
 use cccms\services\NodeService;
 
-class SysAuth extends Model
+class SysAuth extends Pivot
 {
     protected $globalScope = [];
+
+    /**
+     * 创建模型实例
+     * @return static
+     */
+    public static function mk($data = []): SysAuth
+    {
+        return new static($data);
+    }
 
     protected function getAuths(): array
     {

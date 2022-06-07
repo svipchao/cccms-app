@@ -7,6 +7,7 @@ use app\admin\model\SysUser;
 use cccms\Base;
 use cccms\extend\{ArrExtend, JwtExtend};
 use cccms\services\{AuthService, MenuService};
+use app\admin\model\SysAuth;
 
 /**
  * 用户管理
@@ -56,6 +57,7 @@ class User extends Base
     {
         $this->model->update(_validate('put', 'sys_user|id|group_ids,true', [
             'password|密码' => 'alphaNum|length:5,32',
+            'token|Token' => 'alphaNum|length:32'
         ]));
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
@@ -76,7 +78,7 @@ class User extends Base
             'type' => null,
             'user' => null,
         ]]);
-        $users = $this->model->with('groups')->_withSearch('user,group_id,type', [
+        $users = $this->model->with('groups')->append(['type_text'])->_withSearch('user,group_id,type', [
             'group_id' => $params['group_id'],
             'type' => $params['type'],
             'user' => $params['user'],
@@ -109,30 +111,18 @@ class User extends Base
         $accessToken = $this->app->request->header('accessToken', '');
         if (empty($accessToken)) {
             $params = $this->request->post(['username' => '', 'password' => '']);
-            $userInfo = AuthService::instance()->setUserInfo([
+            $userInfo = SysUser::mk()->field('id,nickname,username,avatar,token')->_read([
                 ['username', '=', $params['username']],
                 ['password', '=', md5($params['password'])],
                 ['status', '=', 1]
             ]);
         } else {
-            $accessToken = JwtExtend::verifyToken($accessToken);
-            if (!$accessToken) {
-                _result(['code' => 401, 'msg' => 'Token已失效，请重新登陆'], _getEnCode());
-            }
-            $userInfo = AuthService::instance()->setUserInfo([
-                ['id', '=', $accessToken['id']],
-                ['token', '=', $accessToken['token']],
-                ['status', '<>', 0]
-            ]);
+            $userInfo = AuthService::instance()->getUserInfo();
         }
-        $userInfo['menus'] = MenuService::instance()->getTypesMenus($userInfo['nodes']);
         $expTime = time() + config('session.expire');
-        $accessToken = JwtExtend::getToken([
-            'id' => $userInfo['id'],
-            'token' => $userInfo['token'],
-            'logintime' => time(),
-            'exp' => $expTime,
-        ]);
+        $accessToken = JwtExtend::getToken(array_merge($userInfo, ['logintime' => time(), 'exp' => $expTime]));
+        $userInfo['nodes'] = SysAuth::mk()->getUserNodes($userInfo['id']);
+        $userInfo['menus'] = MenuService::instance()->getTypesMenus($userInfo['nodes']);
         _result(['code' => 200, 'msg' => '登录成功', 'data' => array_merge($userInfo, [
             'accessToken' => $accessToken,
             'loginExpire' => $expTime

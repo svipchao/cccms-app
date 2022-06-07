@@ -71,9 +71,7 @@ class Types extends Base
             'page' => 1,
             'type' => null
         ]]);
-        $data = $this->model->_withSearch('type', [
-            'type' => $params['type']
-        ])->_page($params);
+        $data = $this->model->_withSearch('type', ['type' => $params['type']])->_page($params);
         _result([
             'code' => 200,
             'msg' => 'success',

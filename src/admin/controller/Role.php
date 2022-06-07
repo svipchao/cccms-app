@@ -67,10 +67,9 @@ class Role extends Base
      */
     public function index()
     {
-        $roles = $this->model->with(['groups', 'nodes'])->where([
+        $roles = $this->model->with(['groups'])->where([
             ['id', 'in', AuthService::instance()->getUserRoles(true)]
         ])->_list(null, function ($item) {
-            $item['nodes'] = array_column($item['nodes'], 'node');
             $item['group_ids'] = array_column($item['groups'], 'id');
             return $item;
         });
@@ -103,9 +102,8 @@ class Role extends Base
                 $nodes = AuthService::instance()->getUserNodes();
             }
         } else {
-            $nodes = $this->model->_read($role_id, function ($data) {
-                return $data->nodes->column('node');
-            });
+            // column不会触发获取器
+            $nodes = explode(',', $this->model->where('id', $role_id)->value('nodes'));
         }
         // 框架节点
         $frameNodes = NodeService::instance()->getFrameNodes();
