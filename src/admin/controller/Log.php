@@ -49,14 +49,10 @@ class Log extends Base
         $data = $this->model->with(['user'])->_withSearch('user', [
             'user' => $params['user']
         ])->auth()->order('id desc')->_page($params);
-        _result([
-            'code' => 200,
-            'msg' => 'success',
-            'data' => [
-                'fields' => AuthService::instance()->fields('sys_log'),
-                'total' => $data['total'],
-                'data' => $data['data']
-            ]
-        ], _getEnCode());
+        _result(['code' => 200, 'msg' => 'success', 'data' => [
+            'fields' => AuthService::instance()->fields('sys_log'),
+            'total' => $data['total'],
+            'data' => $data['data']
+        ]], _getEnCode());
     }
 }

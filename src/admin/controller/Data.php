@@ -83,15 +83,11 @@ class Data extends Base
             $item['field_name'] = $tableInfo['fields'][$item['field']] ?? '未知';
             return $item;
         });
-        _result([
-            'code' => 200,
-            'msg' => 'success',
-            'data' => [
-                'total' => $data['total'],
-                'roles' => AuthService::instance()->getUserRoles(),
-                'table' => $tableInfo,
-                'data' => $data['data'],
-            ]
-        ]);
+        _result(['code' => 200, 'msg' => 'success', 'data' => [
+            'roles' => AuthService::instance()->getUserRoles(),
+            'table' => $tableInfo,
+            'data' => $data['data'],
+            'total' => $data['total']
+        ]]);
     }
 }

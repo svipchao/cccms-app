@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace app\admin\controller;
 
-use app\admin\model\SysUser;
 use cccms\Base;
 use cccms\extend\{ArrExtend, JwtExtend};
 use cccms\services\{AuthService, MenuService};
-use app\admin\model\SysAuth;
+use app\admin\model\{SysUser, SysAuth};
 
 /**
  * 用户管理
@@ -86,17 +85,13 @@ class User extends Base
             $item['group_ids'] = array_column($item['groups'], 'id');
             return $item;
         });
-        _result([
-            'code' => 200,
-            'msg' => 'success',
-            'data' => [
-                'fields' => AuthService::instance()->fields('sys_user'),
-                'types' => config('cccms.user.types'),
-                'groups' => ArrExtend::toTreeList(AuthService::instance()->getUserGroups(), 'id', 'group_id'),
-                'total' => $users['total'] ?? 0,
-                'data' => $users['data'] ?? []
-            ]
-        ], _getEnCode());
+        _result(['code' => 200, 'msg' => 'success', 'data' => [
+            'fields' => AuthService::instance()->fields('sys_user'),
+            'types' => config('cccms.user.types'),
+            'groups' => ArrExtend::toTreeList(AuthService::instance()->getUserGroups(), 'id', 'group_id'),
+            'total' => $users['total'] ?? 0,
+            'data' => $users['data'] ?? []
+        ]], _getEnCode());
     }
 
     /**

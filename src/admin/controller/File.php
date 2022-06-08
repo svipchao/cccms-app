@@ -89,15 +89,11 @@ class File extends Base
             'type_id' => $params['type_id'],
             'user' => $params['user']
         ])->auth()->order('id desc')->_page($params);
-        _result([
-            'code' => 200,
-            'msg' => 'success',
-            'data' => [
-                'fields' => AuthService::instance()->fields('sys_file'),
-                'types' => TypesService::instance()->getTypes(4),
-                'total' => $data['total'],
-                'data' => $data['data']
-            ]
-        ], _getEnCode());
+        _result(['code' => 200, 'msg' => 'success', 'data' => [
+            'fields' => AuthService::instance()->fields('sys_file'),
+            'types' => TypesService::instance()->getTypes(4),
+            'total' => $data['total'],
+            'data' => $data['data']
+        ]], _getEnCode());
     }
 }

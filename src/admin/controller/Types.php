@@ -72,15 +72,11 @@ class Types extends Base
             'type' => null
         ]]);
         $data = $this->model->_withSearch('type', ['type' => $params['type']])->_page($params);
-        _result([
-            'code' => 200,
-            'msg' => 'success',
-            'data' => [
-                'fields' => AuthService::instance()->fields('sys_types'),
-                'total' => $data['total'],
-                'data' => $data['data'],
-                'type' => config('cccms.types.type'),
-            ]
-        ], _getEnCode());
+        _result(['code' => 200, 'msg' => 'success', 'data' => [
+            'fields' => AuthService::instance()->fields('sys_types'),
+            'type' => config('cccms.types.type'),
+            'total' => $data['total'],
+            'data' => $data['data'],
+        ]], _getEnCode());
     }
 }

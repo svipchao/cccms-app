@@ -73,14 +73,10 @@ class Role extends Base
             $item['group_ids'] = array_column($item['groups'], 'id');
             return $item;
         });
-        _result([
-            'code' => 200,
-            'msg' => 'success',
-            'data' => [
-                'fields' => AuthService::instance()->fields('sys_role'),
-                'data' => ArrExtend::toTreeList($roles, 'id', 'role_id')
-            ]
-        ], _getEnCode());
+        _result(['code' => 200, 'msg' => 'success', 'data' => [
+            'fields' => AuthService::instance()->fields('sys_role'),
+            'data' => ArrExtend::toTreeList($roles, 'id', 'role_id')
+        ]], _getEnCode());
     }
 
     /**

@@ -69,14 +69,10 @@ class Menu extends Base
         $data = $this->model->with('type')->_withSearch('type_id', [
             'type_id' => $this->request->get('type_id/d', 0)
         ])->_list();
-        _result([
-            'code' => 200,
-            'msg' => 'success',
-            'data' => [
-                'fields' => AuthService::instance()->fields('sys_menu'),
-                'types' => TypesService::instance()->getTypes(1),
-                'data' => ArrExtend::toTreeList($data, 'id', 'menu_id')
-            ]
-        ], _getEnCode());
+        _result(['code' => 200, 'msg' => 'success', 'data' => [
+            'fields' => AuthService::instance()->fields('sys_menu'),
+            'types' => TypesService::instance()->getTypes(1),
+            'data' => ArrExtend::toTreeList($data, 'id', 'menu_id')
+        ]], _getEnCode());
     }
 }
