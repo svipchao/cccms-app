@@ -19,7 +19,7 @@ class SysAuth extends Pivot
 
     protected function getAuths(): array
     {
-        return $this->select()->toArray();
+        return $this->cache()->column('*');
     }
 
     protected function isAdmin($user_id = null): bool
@@ -41,7 +41,7 @@ class SysAuth extends Pivot
         return [$auths, array_unique(array_filter($group_ids)), array_unique(array_filter($role_ids))];
     }
 
-    // 用户拥有的组织ID集合不包含子级
+    // 用户拥有的组织集合不包含子级
     public function getUserGroups($user_id = null): array
     {
         if ($this->isAdmin($user_id)) return SysGroup::mk()->getAllGroups();
@@ -58,7 +58,7 @@ class SysAuth extends Pivot
         ])->_list();
     }
 
-    // 用户拥有的角色ID集合
+    // 用户拥有的角色集合
     public function getUserRoles($user_id = null): array
     {
         if ($this->isAdmin($user_id)) return SysRole::mk()->getAllRoles();
@@ -79,7 +79,7 @@ class SysAuth extends Pivot
     public function getUserNodes($user_id = null): array
     {
         if ($this->isAdmin($user_id)) return NodeService::instance()->getNodes();
-        $nodes = SysRole::mk()->where('id', 'in', $this->getUserRoles($user_id))->cache()->column('nodes');
-        return array_filter(array_keys(array_flip(explode(',', implode(',', $nodes)))));
+        $nodes = array_merge(...array_column($this->getUserRoles($user_id), 'nodes'));
+        return array_keys(array_flip($nodes));
     }
 }
