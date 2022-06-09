@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace app\admin\controller;
 
+use app\admin\model\SysUser;
 use cccms\Base;
 use cccms\extend\{ArrExtend, JwtExtend};
 use cccms\services\{AuthService, MenuService};
-use app\admin\model\{SysUser, SysAuth};
+use app\admin\model\SysAuth;
 
 /**
  * 用户管理
@@ -85,13 +86,17 @@ class User extends Base
             $item['group_ids'] = array_column($item['groups'], 'id');
             return $item;
         });
-        _result(['code' => 200, 'msg' => 'success', 'data' => [
-            'fields' => AuthService::instance()->fields('sys_user'),
-            'types' => config('cccms.user.types'),
-            'groups' => ArrExtend::toTreeList(AuthService::instance()->getUserGroups(), 'id', 'group_id'),
-            'total' => $users['total'] ?? 0,
-            'data' => $users['data'] ?? []
-        ]], _getEnCode());
+        _result([
+            'code' => 200,
+            'msg' => 'success',
+            'data' => [
+                'fields' => AuthService::instance()->fields('sys_user'),
+                'types' => config('cccms.user.types'),
+                'groups' => ArrExtend::toTreeList(AuthService::instance()->getUserGroups(), 'id', 'group_id'),
+                'total' => $users['total'] ?? 0,
+                'data' => $users['data'] ?? []
+            ]
+        ], _getEnCode());
     }
 
     /**
@@ -111,6 +116,9 @@ class User extends Base
                 ['password', '=', md5($params['password'])],
                 ['status', '=', 1]
             ]);
+            if (empty($userInfo)) {
+                _result(['code' => 401, 'msg' => '账号不存在'], _getEnCode());
+            }
         } else {
             $userInfo = AuthService::instance()->getUserInfo();
         }
