@@ -117,7 +117,7 @@ class User extends Base
                 ['status', '=', 1]
             ]);
             if (empty($userInfo)) {
-                _result(['code' => 401, 'msg' => '账号不存在'], _getEnCode());
+                _result(['code' => 401, 'msg' => '账号或密码错误'], _getEnCode());
             }
         } else {
             $userInfo = AuthService::instance()->getUserInfo();
