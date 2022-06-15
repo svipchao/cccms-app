@@ -17,9 +17,18 @@ class SysAuth extends Pivot
         return new static($data);
     }
 
-    protected function getAuths(): array
+    /**
+     * 权限列表
+     * @param bool $isAdministrator 是否组织(角色)管理员
+     * @return array
+     */
+    protected function getAuths(bool $isAdministrator = false): array
     {
-        return $this->cache()->column('*');
+        if ($isAdministrator) {
+            return $this->where('administrator', 1)->cache()->column('*');
+        } else {
+            return $this->cache()->column('*');
+        }
     }
 
     protected function isAdmin($user_id = null): bool
@@ -27,10 +36,16 @@ class SysAuth extends Pivot
         return $user_id == 1;
     }
 
-    protected function getUserAuths($user_id = null): array
+    /**
+     * 获取用户权限
+     * @param mixed $user_id 用户ID 管理员拥有所有权限
+     * @param bool $isAdministrator 是否组织(角色)管理员
+     * @return array
+     */
+    protected function getUserAuths($user_id = null, bool $isAdministrator = false): array
     {
         if (empty($user_id)) return array_pad([], 3, []);
-        $auths = $this->getAuths();
+        $auths = $this->getAuths($isAdministrator);
         $group_ids = $role_ids = [];
         foreach ($auths as $auth) {
             if ($auth['user_id'] == $user_id) {
@@ -41,11 +56,16 @@ class SysAuth extends Pivot
         return [$auths, array_unique(array_filter($group_ids)), array_unique(array_filter($role_ids))];
     }
 
-    // 用户拥有的组织集合不包含子级
-    public function getUserGroups($user_id = null): array
+    /**
+     * 用户拥有的组织集合不包含子级
+     * @param mixed $user_id 用户ID 管理员拥有所有权限
+     * @param bool $isAdministrator 是否组织(角色)管理员
+     * @return array
+     */
+    public function getUserGroups($user_id = null, bool $isAdministrator = false): array
     {
         if ($this->isAdmin($user_id)) return SysGroup::mk()->getAllGroups();
-        [$auths, $group_ids, $role_ids] = $this->getUserAuths($user_id);
+        [$auths, $group_ids, $role_ids] = $this->getUserAuths($user_id, $isAdministrator);
         foreach ($auths as $auth) {
             if (in_array($auth['role_id'], $role_ids)) {
                 $group_ids[] = $auth['group_id'] ?: null;
@@ -58,11 +78,16 @@ class SysAuth extends Pivot
         ])->_list();
     }
 
-    // 用户拥有的角色集合
-    public function getUserRoles($user_id = null): array
+    /**
+     * 用户拥有的角色集合
+     * @param mixed $user_id 用户ID 管理员拥有所有权限
+     * @param bool $isAdministrator 是否组织(角色)管理员
+     * @return array
+     */
+    public function getUserRoles($user_id = null, bool $isAdministrator = false): array
     {
         if ($this->isAdmin($user_id)) return SysRole::mk()->getAllRoles();
-        [$auths, $group_ids, $role_ids] = $this->getUserAuths($user_id);
+        [$auths, $group_ids, $role_ids] = $this->getUserAuths($user_id, $isAdministrator);
         foreach ($auths as $auth) {
             if (in_array($auth['group_id'], $group_ids)) {
                 $role_ids[] = $auth['role_id'] ?: null;
