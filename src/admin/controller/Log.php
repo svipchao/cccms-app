@@ -44,11 +44,11 @@ class Log extends Base
         $params = _validate('get', ['sys_log', '', [
             'page' => 1,
             'limit' => 15,
-            'user' => null,
+            'user' => '',
         ]]);
         $data = $this->model->with(['user'])->_withSearch('user', [
             'user' => $params['user']
-        ])->auth()->order('id desc')->_page($params);
+        ])->order('id desc')->_page($params);
         _result(['code' => 200, 'msg' => 'success', 'data' => [
             'fields' => AuthService::instance()->fields('sys_log'),
             'total' => $data['total'],

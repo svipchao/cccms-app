@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace app\admin\model;
 
-use think\model\relation\BelongsToMany;
+use think\model\relation\{HasMany, BelongsToMany};
 use cccms\Model;
 use cccms\services\AuthService;
 
@@ -41,26 +41,28 @@ class SysUser extends Model
         return $this->belongsToMany(SysGroup::class, SysAuth::class, 'group_id', 'user_id');
     }
 
+    // 关联权限记录表
+    public function relationAuth(): HasMany
+    {
+        return $this->hasMany(SysAuth::class, 'user_id', 'id');
+    }
+
     public function searchUserAttr($query, $value)
     {
+        // 管理员可以查看任何用户
+        $query->when(!AuthService::instance()->isAdmin(), function ($query) {
+            $query->hasWhere('relationAuth', [
+                ['group_id', 'in', AuthService::instance()->getUserGroups(true, false, true)]
+            ])->whereOr('id', AuthService::instance()->getUserInfo('id'));
+        });
         $query->where('nickname|username', 'like', '%' . $value . '%');
     }
 
     public function searchGroupIdAttr($query, $value)
     {
-        if (empty($value) && !AuthService::instance()->isAdmin()) {
-            $value = implode(',', AuthService::instance()->getUserGroups(true));
-        } else {
-            if (is_string($value)) {
-                $value = explode(',', $value);
-            }
-            $value = implode(',', array_intersect(AuthService::instance()->getUserGroups(true), $value ?: []));
-        }
-        if (!empty($value)) {
-            $query->hasWhere('userGroups', function ($query) use ($value) {
-                $query->where('group_id', 'in', $value);
-            });
-        }
+        $query->hasWhere('relationAuth', function ($query) use ($value) {
+            $query->where('group_id', 'in', $value);
+        });
     }
 
     public function searchTypeAttr($query, $value)
@@ -84,9 +86,7 @@ class SysUser extends Model
 
     public function setStatusAttr($value, $data)
     {
-        if (AuthService::instance()->isAdmin()) {
-            _result(['code' => 403, 'msg' => '不能禁止管理员账号'], _getEnCode());
-        }
+        if ($data['id'] == 1) $value = 1;
         if ($data['id'] == AuthService::instance()->getUserInfo('id')) {
             _result(['code' => 403, 'msg' => '不能禁止自己的账户'], _getEnCode());
         }
