@@ -81,9 +81,13 @@ class User extends Base
             'group_id' => $params['group_id'],
             'type' => $params['type'],
             'user' => $params['user'],
-        ])->_page($params, false, function ($item) {
-            $item['group_ids'] = array_column($item['groups'], 'id');
-            return $item;
+        ])->_page($params, false, function ($data) {
+            $data = $data->toArray();
+            $data['data'] = array_map(function ($item) {
+                $item['group_ids'] = array_column($item['groups'], 'id');
+                return $item;
+            }, $data['data']);
+            return $data;
         });
         _result([
             'code' => 200,

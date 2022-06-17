@@ -77,11 +77,15 @@ class Data extends Base
         $data = $this->model->with('role')->_withSearch('role_id,table', [
             'role_id' => $params['role_id'],
             'table' => $params['table']
-        ])->_page($params, false, function ($item) use ($tableInfo) {
-            $tableInfo = $tableInfo[$item['table']];
-            $item['table_name'] = $tableInfo['table_name'] ?? '未知';
-            $item['field_name'] = $tableInfo['fields'][$item['field']] ?? '未知';
-            return $item;
+        ])->_page($params, false, function ($data) use ($tableInfo) {
+            $data = $data->toArray();
+            $data['data'] = array_map(function ($item) use ($tableInfo) {
+                $tableInfo = $tableInfo[$item['table']];
+                $item['table_name'] = $tableInfo['table_name'] ?? '未知';
+                $item['field_name'] = $tableInfo['fields'][$item['field']] ?? '未知';
+                return $item;
+            }, $data['data']);
+            return $data;
         });
         _result(['code' => 200, 'msg' => 'success', 'data' => [
             'roles' => AuthService::instance()->getUserRoles(),

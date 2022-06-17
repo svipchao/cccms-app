@@ -77,24 +77,27 @@ class Config extends Base
     {
         $data = $this->model->_withSearch('type_id', [
             'type_id' => $this->request->get('type_id/d', 0)
-        ])->_list(null, function ($item) {
-            $item['configure'] = json_decode($item['configure'], true);
-            if (empty($item['configure'])) {
-                return true;
-            } else {
-                $item = array_merge($item['configure'], $item);
-                unset($item['configure']);
-            }
-            if ($item['type'] === 'input-number') {
-                $item['value'] = (int)$item['value'];
-            }
-            if ($item['type'] === 'multiple-select') {
-                $item['value'] = explode(',', strtoupper($item['value']));
-            }
-            if ($item['type'] === 'switch') {
-                $item['value'] = (int)$item['value'];
-            }
-            return $item;
+        ])->_list(null, function ($data) {
+            $data = $data->toArray();
+            return array_map(function ($item) {
+                $item['configure'] = json_decode($item['configure'], true);
+                if (empty($item['configure'])) {
+                    return true;
+                } else {
+                    $item = array_merge($item['configure'], $item);
+                    unset($item['configure']);
+                }
+                if ($item['type'] === 'input-number') {
+                    $item['value'] = (int)$item['value'];
+                }
+                if ($item['type'] === 'multiple-select') {
+                    $item['value'] = explode(',', strtoupper($item['value']));
+                }
+                if ($item['type'] === 'switch') {
+                    $item['value'] = (int)$item['value'];
+                }
+                return $item;
+            }, $data);
         });
         _result(['code' => 200, 'msg' => 'success', 'data' => [
             'fields' => AuthService::instance()->fields('sys_config'),

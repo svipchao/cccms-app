@@ -78,12 +78,15 @@ class Group extends Base
                 $query->getQuery()->field('id,username,nickname');
             }])->where([
                 ['id', 'in', AuthService::instance()->getUserGroups(true)]
-            ])->_list(null, function ($item) {
-                $item['admin_ids'] = array_filter(array_map(function ($user) {
-                    return $user['pivot']['user_id'];
-                }, $item['adminUsers']));
-                $item['role_ids'] = array_column($item['roles'], 'id');
-                return $item;
+            ])->_list(null, function ($data) {
+                $data = $data->toArray();
+                return array_map(function ($item) {
+                    $item['admin_ids'] = array_filter(array_map(function ($user) {
+                        return $user['pivot']['user_id'];
+                    }, $item['adminUsers']));
+                    $item['role_ids'] = array_column($item['roles'], 'id');
+                    return $item;
+                }, $data);
             });
             _result(['code' => 200, 'msg' => 'success', 'data' => [
                 'fields' => AuthService::instance()->fields('sys_group'),

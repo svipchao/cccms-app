@@ -69,9 +69,12 @@ class Role extends Base
     {
         $roles = $this->model->with(['groups'])->where([
             ['id', 'in', AuthService::instance()->getUserRoles(true)]
-        ])->_list(null, function ($item) {
-            $item['group_ids'] = array_column($item['groups'], 'id');
-            return $item;
+        ])->_list(null, function ($data) {
+            $data = $data->toArray();
+            return array_map(function ($item) {
+                $item['group_ids'] = array_column($item['groups'], 'id');
+                return $item;
+            }, $data);
         });
         _result(['code' => 200, 'msg' => 'success', 'data' => [
             'fields' => AuthService::instance()->fields('sys_role'),
