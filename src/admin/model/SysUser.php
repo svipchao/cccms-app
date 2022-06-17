@@ -17,6 +17,7 @@ class SysUser extends Model
         }
     }
 
+    // 关联组织
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(SysGroup::class, SysAuth::class, 'group_id', 'user_id');

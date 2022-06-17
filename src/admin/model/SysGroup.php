@@ -37,10 +37,27 @@ class SysGroup extends Model
         return $this->belongsToMany(SysRole::class, SysAuth::class, 'role_id', 'group_id');
     }
 
+    // 关联管理员用户
+    public function adminUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(SysUser::class, SysAuth::class, 'user_id', 'group_id')
+            ->wherePivot('administrator', 1);
+    }
+
     // 关联用户
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(SysUser::class, SysAuth::class, 'user_id', 'group_id');
+    }
+
+    // 组织管理员
+    public function setAdminIdsAttr($value)
+    {
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+        $this->adminUsers()->detach($this->adminUsers()->column('id'));
+        $this->adminUsers()->attach($value, ['administrator' => 1]);
     }
 
     public function setRoleIdsAttr($value)
