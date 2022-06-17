@@ -10,15 +10,24 @@ use cccms\services\AuthService;
 
 class SysGroup extends Model
 {
-    public function getAllGroups(): array
-    {
-        return $this->field('id,group_id,group_name,group_desc')->_list();
-    }
-
     // 写入后
     public static function onAfterWrite($model)
     {
         Cache::delete('SysGroups');
+        if (isset($model['admin_ids'])) {
+            if (is_string($model['admin_ids'])) {
+                $model['admin_ids'] = explode(',', $model['admin_ids']);
+            }
+            $model->adminUsers()->detach($model->adminUsers()->column('id'));
+            $model->adminUsers()->attach($model['admin_ids'], ['administrator' => 1]);
+        }
+        if (isset($model['role_ids'])) {
+            if (is_string($model['role_ids'])) {
+                $model['role_ids'] = explode(',', $model['role_ids']);
+            }
+            $model->roles()->detach($model->roles()->column('id'));
+            $model->roles()->saveAll($model['role_ids']);
+        }
     }
 
     // 删除前
@@ -30,6 +39,18 @@ class SysGroup extends Model
         if (!empty(AuthService::instance()->getGroupChildren((int)$model['id'], false))) {
             _result(['code' => 403, 'msg' => '存在子级组织，禁止删除'], _getEnCode());
         }
+    }
+
+    // 删除后
+    public static function onAfterDelete($model)
+    {
+        $model->roles()->detach($model->roles()->column('id'));
+        $model->users()->detach($model->users()->column('id'));
+    }
+
+    public function getAllGroups(): array
+    {
+        return $this->field('id,group_id,group_name,group_desc')->_list();
     }
 
     public function roles(): belongsToMany
@@ -48,25 +69,6 @@ class SysGroup extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(SysUser::class, SysAuth::class, 'user_id', 'group_id');
-    }
-
-    // 组织管理员
-    public function setAdminIdsAttr($value)
-    {
-        if (is_string($value)) {
-            $value = explode(',', $value);
-        }
-        $this->adminUsers()->detach($this->adminUsers()->column('id'));
-        $this->adminUsers()->attach($value, ['administrator' => 1]);
-    }
-
-    public function setRoleIdsAttr($value)
-    {
-        if (is_string($value)) {
-            $value = explode(',', $value);
-        }
-        $this->roles()->detach($this->roles()->column('id'));
-        $this->roles()->saveAll($value);
     }
 
     public function setGroupIdAttr($value, $data): int

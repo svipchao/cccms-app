@@ -41,11 +41,7 @@ class User extends Base
      */
     public function delete()
     {
-        $this->model->_delete($this->request->delete('id/d', 0), function ($query) {
-            // 删除关联数据
-            $query->groups()->detach($query->groups()->column('id'));
-            return $query;
-        });
+        $this->model->_delete($this->request->delete('id/d', 0));
         _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 

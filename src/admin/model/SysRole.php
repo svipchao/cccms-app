@@ -10,11 +10,6 @@ use cccms\services\AuthService;
 
 class SysRole extends Model
 {
-    public function getAllRoles(): array
-    {
-        return $this->field('id,role_id,role_name,role_desc')->_list();
-    }
-
     // 写入后
     public static function onAfterWrite($model)
     {
@@ -30,6 +25,11 @@ class SysRole extends Model
         if (!empty(AuthService::instance()->getRoleChildren((int)$model['id'], false))) {
             _result(['code' => 403, 'msg' => '存在子级角色，禁止删除'], _getEnCode());
         }
+    }
+
+    public function getAllRoles(): array
+    {
+        return $this->field('id,role_id,role_name,role_desc')->_list();
     }
 
     public function groups(): belongsToMany

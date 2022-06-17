@@ -41,12 +41,7 @@ class Group extends Base
      */
     public function delete()
     {
-        $this->model->_delete($this->request->delete('id/d', 0), function ($query) {
-            // 删除关联数据
-            $query->roles()->detach($query->roles()->column('id'));
-            $query->users()->detach($query->users()->column('id'));
-            return $query;
-        });
+        $this->model->_delete($this->request->delete('id/d', 0));
         _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
