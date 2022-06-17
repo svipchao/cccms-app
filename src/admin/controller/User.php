@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace app\admin\controller;
 
-use app\admin\model\SysUser;
+use app\admin\model\{SysUser, SysAuth};
 use cccms\Base;
 use cccms\extend\{ArrExtend, JwtExtend};
 use cccms\services\{AuthService, MenuService};
-use app\admin\model\SysAuth;
 
 /**
  * 用户管理
@@ -42,7 +41,11 @@ class User extends Base
      */
     public function delete()
     {
-        $this->model->_delete($this->request->delete('id/d', 0));
+        $this->model->_delete($this->request->delete('id/d', 0), function ($query) {
+            // 删除关联数据
+            $query->groups()->detach($query->groups()->column('id'));
+            return $query;
+        });
         _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 

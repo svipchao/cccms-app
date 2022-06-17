@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace app\admin\model;
 
 use think\facade\Cache;
+use think\model\relation\BelongsToMany;
 use cccms\Model;
 use cccms\services\AuthService;
-use think\model\relation\BelongsToMany;
 
 class SysRole extends Model
 {

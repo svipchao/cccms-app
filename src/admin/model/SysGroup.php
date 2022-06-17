@@ -19,13 +19,6 @@ class SysGroup extends Model
     public static function onAfterWrite($model)
     {
         Cache::delete('SysGroups');
-        if (!empty($model['role_ids'])) {
-            if (is_string($model['role_ids'])) {
-                $model['role_ids'] = explode(',', $model['role_ids']);
-            }
-            $model->roles()->detach();
-            $model->roles()->saveAll($model['role_ids']);
-        }
     }
 
     // 删除前
@@ -39,15 +32,6 @@ class SysGroup extends Model
         }
     }
 
-    // 删除后
-    public static function onAfterDelete($model)
-    {
-        // 删除组织角色关联数据
-        $model->roles()->detach();
-        // 删除组织用户关联数据
-        $model->users()->detach();
-    }
-
     public function roles(): belongsToMany
     {
         return $this->belongsToMany(SysRole::class, SysAuth::class, 'role_id', 'group_id');
@@ -57,6 +41,15 @@ class SysGroup extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(SysUser::class, SysAuth::class, 'user_id', 'group_id');
+    }
+
+    public function setRoleIdsAttr($value)
+    {
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+        $this->roles()->detach($this->roles()->column('id'));
+        $this->roles()->saveAll($value);
     }
 
     public function setGroupIdAttr($value, $data): int

@@ -9,31 +9,12 @@ use cccms\services\AuthService;
 
 class SysUser extends Model
 {
-    // 写入后
-    public static function onAfterWrite($model)
-    {
-        if (isset($model['group_ids'])) {
-            if (is_string($model['group_ids'])) {
-                $model['group_ids'] = explode(',', $model['group_ids']);
-            }
-            // 删除组织关联权限节点表数据
-            $model->groups()->detach();
-            $model->groups()->attach($model['group_ids']);
-        }
-    }
-
     // 删除前
     public static function onBeforeDelete($model)
     {
         if ($model['id'] === AuthService::instance()->getUserInfo('id')) {
             _result(['code' => 403, 'msg' => '禁止删除自己的账户'], _getEnCode());
         }
-    }
-
-    // 删除后
-    public static function onAfterDelete($model)
-    {
-        $model->groups()->detach();
     }
 
     public function groups(): BelongsToMany
@@ -68,6 +49,15 @@ class SysUser extends Model
     public function searchTypeAttr($query, $value)
     {
         $query->where('type', '=', $value);
+    }
+
+    public function setGroupIdsAttr($value)
+    {
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+        $this->groups()->detach($this->groups()->column('id'));
+        $this->groups()->saveAll($value);
     }
 
     public function setTokenAttr($value): string
