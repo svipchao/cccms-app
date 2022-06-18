@@ -14,14 +14,14 @@ class SysGroup extends Model
     public static function onAfterWrite($model)
     {
         Cache::delete('SysGroups');
-        if (isset($model['admin_ids'])) {
+        if (!empty($model['admin_ids'])) {
             if (is_string($model['admin_ids'])) {
                 $model['admin_ids'] = explode(',', $model['admin_ids']);
             }
             $model->adminUsers()->detach($model->adminUsers()->column('id'));
             $model->adminUsers()->attach($model['admin_ids'], ['administrator' => 1]);
         }
-        if (isset($model['role_ids'])) {
+        if (!empty($model['role_ids'])) {
             if (is_string($model['role_ids'])) {
                 $model['role_ids'] = explode(',', $model['role_ids']);
             }
