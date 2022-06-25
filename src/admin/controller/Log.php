@@ -28,7 +28,11 @@ class Log extends Base
      */
     public function delete()
     {
-        $this->model->whereTime('create_time', '<', '-30 day')->delete();
+        $this->model->destroy(function ($query) {
+            $query->_withSearch(['user'], [
+                'user' => '',
+            ])->whereTime('log.create_time', '<', '-30 day');
+        });
         _result(['code' => 200, 'msg' => '删除成功'], _getEnCode());
     }
 
@@ -48,7 +52,7 @@ class Log extends Base
         ]]);
         $data = $this->model->with(['user'])->_withSearch('user', [
             'user' => $params['user']
-        ])->order('id desc')->_page($params);
+        ])->order('log.id desc')->_page($params);
         _result(['code' => 200, 'msg' => 'success', 'data' => [
             'fields' => AuthService::instance()->fields('sys_log'),
             'total' => $data['total'],

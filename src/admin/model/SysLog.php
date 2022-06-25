@@ -14,7 +14,7 @@ class SysLog extends Model
     public function user(): HasOne
     {
         return $this->hasOne(SysUser::class, 'id', 'user_id')
-            ->bind(['nickname', 'username']);
+            ->bind(['username', 'nickname']);
     }
 
     // 关联权限记录表
@@ -26,13 +26,16 @@ class SysLog extends Model
     public function searchUserAttr($query, $value)
     {
         // 管理员可以查看任何用户
-        $query->when(!AuthService::instance()->isAdmin(), function ($query) {
-            $query->hasWhere('relationAuth', [
-                ['group_id', 'in', AuthService::instance()->getUserGroups(true, false, true)]
-            ])->whereOr('id', AuthService::instance()->getUserInfo('id'));
+        $query->alias('log')->when(!AuthService::instance()->isAdmin(), function ($query) {
+            $query->where('log.user_id', 'in', function ($query) {
+                $query->table('sys_auth')->whereOr([
+                    ['group_id', 'in', AuthService::instance()->getUserGroups(true, false, true)],
+                    ['user_id', '=', AuthService::instance()->getUserInfo('id')]
+                ])->field('user_id');
+            });
         });
-        $query->hasWhere('user', function ($query) use ($value) {
-            $query->where('nickname|username', 'like', "%" . $value . "%");
+        $query->where('log.user_id', 'in', function ($query) use ($value) {
+            $query->table('sys_user')->where('nickname|username', 'like', '%' . $value . '%')->field('id');
         });
     }
 }
