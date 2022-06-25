@@ -92,8 +92,8 @@ class Role extends Base
     public function auth()
     {
         $role_id = $this->request->get('role_id/d', 0);
-        // 全部节点
-        $allNodes = NodeService::instance()->getNodesInfo();
+        // 需要授权的全部节点
+        $allNodes = NodeService::instance()->getAuthNodes();
         if ($role_id === 0) {
             if (AuthService::instance()->isAdmin()) {
                 $nodes = array_keys($allNodes);
