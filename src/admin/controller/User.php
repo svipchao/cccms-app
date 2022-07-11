@@ -113,7 +113,7 @@ class User extends Base
     {
         $accessToken = $this->app->request->header('accessToken', '');
         $params = $this->request->post(['username' => '', 'password' => '']);
-        if (empty($accessToken) && !empty($params['username'])) {
+        if (empty($accessToken) && !empty($params['username']) && !empty($params['password'])) {
             $userInfo = SysUser::mk()->field('id,nickname,username,avatar,token,type')->_read([
                 ['username', '=', $params['username']],
                 ['password', '=', md5($params['password'])],
