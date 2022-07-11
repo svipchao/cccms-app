@@ -112,8 +112,8 @@ class User extends Base
     public function login()
     {
         $accessToken = $this->app->request->header('accessToken', '');
-        if (empty($accessToken)) {
-            $params = $this->request->post(['username' => '', 'password' => '']);
+        $params = $this->request->post(['username' => '', 'password' => '']);
+        if (empty($accessToken) && !empty($params['username'])) {
             $userInfo = SysUser::mk()->field('id,nickname,username,avatar,token,type')->_read([
                 ['username', '=', $params['username']],
                 ['password', '=', md5($params['password'])],
