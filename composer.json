@@ -1,5 +1,5 @@
 {
-  "name": "svipchao/cccms-app",
+  "name": "poetry/cccms-app",
   "description": "CCCMS 应用包扩展",
   "type": "library",
   "license": "MIT",
