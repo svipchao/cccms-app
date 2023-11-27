@@ -1,0 +1,22 @@
+{
+  "name": "svipchao/cccms-app",
+  "description": "CCCMS 应用包扩展",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "诗无尽头i",
+      "email": "svipchao@qq.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=7.4",
+    "svipchao/cccms-library": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "app\\": "src/"
+    }
+  }
+}
