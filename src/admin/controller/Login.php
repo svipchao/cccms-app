@@ -5,7 +5,7 @@ namespace app\admin\controller;
 
 use cccms\Base;
 use cccms\model\SysUser;
-use cccms\services\{ConfigService, UserService, CaptchaService};
+use cccms\services\{UserService, CaptchaService};
 
 /**
  * 登录管理
