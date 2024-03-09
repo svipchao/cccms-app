@@ -76,8 +76,9 @@ class User extends Base
             $data = $data->toArray();
             $data['data'] = array_map(function ($item) {
                 $item['dept_ids'] = array_column($item['depts'], 'id');
+                $item['depts'] = array_column($item['depts'], 'dept_name');
                 $item['role_ids'] = array_column($item['roles'], 'id');
-                unset($item['depts'], $item['roles']);
+                $item['roles'] = array_column($item['roles'], 'role_name');
                 return $item;
             }, $data['data']);
             return $data;
