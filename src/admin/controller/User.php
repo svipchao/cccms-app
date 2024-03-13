@@ -99,46 +99,4 @@ class User extends Base
             'data' => $users['data'] ?? [],
         ]], _getEnCode());
     }
-
-    /**
-     * 老师列表
-     * @auth true
-     * @login true
-     * @encode json|jsonp|xml
-     * @methods GET
-     */
-    public function teacher(): void
-    {
-        $params = _validate('get.sys_user.true', 'page,limit|user');
-        $users = $this->model->_withSearch('user,type', [
-            'user' => $params['user'] ?? null,
-            'type' => 1,
-        ])->_page($params);
-        _result(['code' => 200, 'msg' => 'success', 'data' => [
-            'fields' => AuthService::instance()->fields('sys_user'),
-            'total' => $users['total'] ?? 0,
-            'data' => $users['data'] ?? [],
-        ]], _getEnCode());
-    }
-
-    /**
-     * 学生列表
-     * @auth true
-     * @login true
-     * @encode json|jsonp|xml
-     * @methods GET
-     */
-    public function student(): void
-    {
-        $params = _validate('get.sys_user.true', 'page,limit|user');
-        $users = $this->model->_withSearch('user,type', [
-            'user' => $params['user'] ?? null,
-            'type' => 0,
-        ])->_page($params);
-        _result(['code' => 200, 'msg' => 'success', 'data' => [
-            'fields' => AuthService::instance()->fields('sys_user'),
-            'total' => $users['total'] ?? 0,
-            'data' => $users['data'] ?? [],
-        ]], _getEnCode());
-    }
 }
