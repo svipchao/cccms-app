@@ -1,13 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace app\admin\controller;
 
 use cccms\Base;
-use cccms\model\SysDept;
-use cccms\model\SysRole;
-use cccms\model\SysUser;
 use cccms\services\AuthService;
+use cccms\model\{SysUser, SysDept, SysRole};
 
 /**
  * 用户管理
@@ -60,6 +59,8 @@ class User extends Base
         $params = _validate('put.sys_user.true', 'id|role_ids,dept_ids');
         if (!empty($params['password'])) {
             $params['password'] = md5($params['password']);
+        } else {
+            unset($params['password']);
         }
         $this->model->update($params);
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
