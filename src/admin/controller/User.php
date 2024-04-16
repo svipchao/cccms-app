@@ -57,7 +57,7 @@ class User extends Base
      */
     public function update(): void
     {
-        $params = _validate('put.sys_user.true', 'id|dept_ids,dept_ids');
+        $params = _validate('put.sys_user.true', 'id|role_ids,dept_ids');
         if (!empty($params['password'])) {
             $params['password'] = md5($params['password']);
         }
