@@ -95,7 +95,7 @@ class Login extends Base
     public function refreshToken(): void
     {
         $this->app->cache->clear();
-        $userInfo = SysUser::mk()
+        $userInfo = SysUser::mk()->withoutGlobalScope()
             ->field('id,invite_id,nickname,username,avatar,phone,email,range')
             ->where('status', 1)
             ->findOrEmpty(UserService::instance()->getUserInfo('id'))
