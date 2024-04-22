@@ -1,12 +1,13 @@
 <?php
-
 declare(strict_types=1);
 
 namespace app\admin\controller;
 
 use cccms\Base;
-use cccms\services\AuthService;
-use cccms\model\{SysUser, SysDept, SysRole};
+use cccms\model\SysDept;
+use cccms\model\SysRole;
+use cccms\model\SysUser;
+use cccms\services\{UserService, AuthService};
 
 /**
  * 用户管理
@@ -28,9 +29,9 @@ class User extends Base
      */
     public function create(): void
     {
-        $params = _validate('post.sys_user.true', 'nickname,username,password|role_ids,dept_ids,tags');
+        $params = _validate('post.sys_user.true', 'nickname,username,password|role_ids,dept_ids');
         $params['password'] = md5($params['password']);
-        $this->model->create($params);
+        $this->model->save($params);
         _result(['code' => 200, 'msg' => '添加成功'], _getEnCode());
     }
 
@@ -62,7 +63,11 @@ class User extends Base
         } else {
             unset($params['password']);
         }
-        $this->model->update($params);
+        $user = $this->model->where('id', $params['id'])->findOrEmpty();
+        if ($user->isEmpty()) {
+            _result(['code' => 403, 'msg' => '用户不存在'], _getEnCode());
+        }
+        $user->save($params);
         _result(['code' => 200, 'msg' => '更新成功'], _getEnCode());
     }
 
@@ -95,7 +100,7 @@ class User extends Base
         _result(['code' => 200, 'msg' => 'success', 'data' => [
             'fields' => AuthService::instance()->fields('sys_user'),
             'roles' => SysRole::mk()->getAllOpenRole(true),
-            'depts' => SysDept::mk()->getAllOpenDept(true),
+            'depts' => UserService::instance()->getUserDepts('tree'),
             'total' => $users['total'] ?? 0,
             'data' => $users['data'] ?? [],
         ]], _getEnCode());
