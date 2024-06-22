@@ -15,10 +15,10 @@ class File extends Base
      * 附件
      * @auth false
      * @login false
-     * @encode json|jsonp|xml|view
+     * @encode view
      * @methods GET
      */
-    public function file()
+    public function file(): void
     {
         Storage::instance()->query();
     }
